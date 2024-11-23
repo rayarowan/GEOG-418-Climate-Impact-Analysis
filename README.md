@@ -55,7 +55,6 @@ The first step in conducting this research is to perform descriptive statistics 
 The below code displays how we read the fire point .csv from the current working directory into a dataframe called data. Since the dataframe contains dates ranging across 2021, we want to filter the data to be from May 1st, 2021 to September 1st, 2021 and store the filtered data in a new object called fire_point. To do this we must extract the IGN_DATE from the dataframe and take the first 8 characters of the IGN_DATE column. We then convert the extracted substring to the date type using the format %Y%m%d (year, month, day).
 
 ```{r Read in data, echo=TRUE, eval=TRUE, warning=FALSE}
-
 # Load wildfire point data and set CRS if needed
 data <- read.csv("H_FIRE_PNT.csv")
 # Extract just the date part from IGN_DATE and convert it to Date type
@@ -68,7 +67,87 @@ We then create a dataframe (df) from the csv file.
 ```{r Read in data, echo=TRUE, eval=TRUE, warning=FALSE}
 df <- as.data.frame(fire_point) 
 ```
-We are now ready to calcualte our descriptive statistics (mean, mode, standard deviation, median, skewness, kurtosis, Coefficient of Variation and normal districution, 
+
+We are now ready to calcualte our descriptive statistics (mean, mode, standard deviation, median, skewness, kurtosis, Coefficient of Variation and normal distribution).
+```{r DescriptiveStats, echo=TRUE, eval=TRUE, warning=FALSE}
+# Mean
+mean_size <- mean(df$SIZE_HA, na.rm = TRUE)
+# Mode 
+mode_size <- as.numeric(names(sort(table(df$SIZE_HA), decreasing = TRUE))[1])
+# Standard Deviation
+sd_size <- sd(df$SIZE_HA, na.rm = TRUE) 
+# Median
+med_size <- median(df$SIZE_HA, na.rm = TRUE)
+# Skewness
+skew_size <- skewness(df$SIZE_HA, na.rm = TRUE)[1]
+# Kurtosis
+kurt_size <- kurtosis(df$SIZE_HA, na.rm = TRUE)[1]
+# Coefficient of Variation
+cov_size <- (sd_size / mean_size) * 100
+# Normal Distribution test
+norm_size <- shapiro.test(df$SIZE_HA)$p.value
+```
+
+To display these results in a table use the following code.
+```{r DescriptiveStats, echo=TRUE, eval=TRUE, warning=FALSE}
+# Data for Table 1
+data.for.table1 <- data.frame(
+  Sample = c("Fire Size (ha)"),
+  Mean = round(mean_size, 3),
+  SD = round(sd_size, 3),
+  Median = round(med_size, 3),
+  Mode = round(mode_size, 3)
+)
+
+# Data for Table 2
+data.for.table2 <- data.frame(
+  Sample = c("Fire Size (ha)"),
+  Skewness = round(skew_size, 3),
+  Kurtosis = round(kurt_size, 3),
+  CoV = round(cov_size, 3),
+  Normality = round(norm_size, 5)
+)
+
+# Create Table 1 with Caption
+table1 <- tableGrob(data.for.table1, rows = c(""), theme = ttheme_default(base_size = 12))
+t1Caption <- textGrob("Table 1: Descriptive Statistics for Summer 2021 Fire Size.",
+                      gp = gpar(fontsize = 12))
+padding <- unit(5, "mm")
+
+table1 <- gtable_add_rows(table1, 
+                          heights = grobHeight(t1Caption) + padding, 
+                          pos = 0)
+
+table1 <- gtable_add_grob(table1,
+                          t1Caption, t = 1, l = 2, r = ncol(data.for.table1) + 1)
+
+# Create Table 2 with Caption
+table2 <- tableGrob(data.for.table2, rows = c(""), theme = ttheme_default(base_size = 12))
+t2Caption <- textGrob("Table 2: Descriptive Statistics for Summer 2021 Fire Size.",
+                      gp = gpar(fontsize = 12))
+
+table2 <- gtable_add_rows(table2, 
+                          heights = grobHeight(t2Caption) + padding, 
+                          pos = 0)
+
+table2 <- gtable_add_grob(table2,
+                          t2Caption, t = 1, l = 2, r = ncol(data.for.table2) + 1)
+
+# Export Table 1 as PNG
+png("Output_Table1.png", width = 1000, height = 500, res = 150)  # Adjusted size and resolution
+grid.arrange(table1, newpage = TRUE)
+dev.off()
+
+# Export Table 2 as PNG
+png("Output_Table2.png", width = 1000, height = 500, res = 150)  # Adjusted size and resolution
+grid.arrange(table2, newpage = TRUE)
+dev.off()
+```
+![Output_Table1](https://github.com/user-attachments/assets/9a8ab686-fc92-4e70-b5d9-0f177b5e03b1)
+
+![Output_Table2](https://github.com/user-attachments/assets/533ccb07-eac1-4e3a-836b-ae1c0c3022ce)
+
+
 
 ## References
 
