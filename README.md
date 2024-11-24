@@ -532,7 +532,9 @@ qcount.df <- plyr::count(qcount.df,'Freq')
 # Change the column names so that x=number of points and f=frequency of quadrats with x point
 colnames(qcount.df) <- c("x","f")
 ```
-We are 
+We are now ready to calculate the variance ($$VAR = \frac{\Sigma f_ix_i^2 - [\frac{(\Sigma f_ix_i)^2}{m}]}{m-1}$$) and variance to mean ($$\frac{\text{VAR}}{\text{MEAN}}$$) quadrat statistics.
+
+
 ## Results
 Provided our results from descriptive statistics we can 
 
