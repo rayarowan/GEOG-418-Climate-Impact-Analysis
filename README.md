@@ -383,6 +383,7 @@ ggsave("Temperature_Map_BC.png", plot = map, width = 10, height = 8, dpi = 300)
 ### Evaluating Spatial Distribution of Wildfires
 To evaluate the spatial distribution of wildfires acros BC from May 1st to September 1st, 2021 a density map of wildfires over this time period will be created followed by point pattern analysis of the wildfire data. 
 
+#### Density Map
 The density map will be a raster dataset representation of points per unity area across the province. The desired outcome will show us the general spread of wildfire points as well as where they are concentrated in BC.
 
 To begin, using the pre-loaded fire dataset (data) convert the fire points to a spatial object. Then transform the points to CRS projection 3005 so that they align and plot on our BC boundary map.
@@ -437,7 +438,66 @@ ggplot() +
 ```
 ![density_of_fires_map](https://github.com/user-attachments/assets/1edcc0cf-a9af-48b1-a0d7-a86b6a0b50ed)
 
-We will now conduct point pattern analysis 
+#### Point Pattern Analysis
+#### Is the Relative Size of Wildfires Location Dependant Across BC in Summer 2021?
+To answer this question, this tutorial will explain how to perform three different statistical tests that  determine if the wildfire size data are showing random, dispersed or clustered spatial patterns.
+
+#### Nearest Neighbour Analysis
+Nearest neighbour analysis is a technique used to determine if points nearby one another display a random, dispersed or clustered pattern (Corvec et al., 2013). It does this by comparing the mean distance between nearest neighbors (Corvec et al., 2013). This distance helps determine how similar or dissimilar two data points are. To determine if our pattern is clustered or disperced we then compared the distance to the average nearest neighbour distance generated using a random pattern for an area with the same spatial density of points.
+
+To conduct a nearest neighbour analysis for wildfire size (ha) across BC in the 2021 summer, we want to aquire the  average nearest neighbour value for a spatially random distribution ($$\bar{NND_R} = \frac{1}{2\sqrt{Density}}$$), the average nearest neighbour value for a perfectly dispersed pattern ($$\bar{NND_D} = \frac{1.07453}{\sqrt{Density}}$$), and a z-score ($$Z_n = \frac{\bar{NND} - \bar{NND_R}}{\sigma\bar{NND}}$$). 
+
+To obtain these results the following code can be used.
+```{r Nearest Neighbour, echo=TRUE, eval=TRUE, warning=FALSE}
+# Conduct Nearest Neighbour Analysis.
+nearestNeighbour <- nndist(df$SIZE_HA)
+
+# Convert the nearestNeighbor object into a dataframe.
+nearestNeighbour=as.data.frame(as.numeric(nearestNeighbour))
+
+# Change the column name to "Distance"
+colnames(nearestNeighbour) = "Distance"
+
+# Calculate the nearest neighbor statistic to test for a random spatial distribution.
+# First calculate the mean nearest neighbour
+nnd = sum(nearestNeighbour$Distance)/nrow(nearestNeighbour)
+
+library(units)
+
+nnd <- set_units(nnd, "m")  # Assign units of meters to nnd
+
+# Next, calculate the mean nearest neighbour for random spatial distribution
+studyArea <- st_area(bc_boundary)
+pointDensity <- nrow(nearestNeighbour) / studyArea
+r.nnd = 1 / (2 * sqrt(pointDensity))
+d.nnd = 1.07453 / sqrt(pointDensity)
+R = nnd / r.nnd
+
+# Calculate the standard deviation
+SE.NND = .26136 / sqrt(nrow(nearestNeighbour) * pointDensity)
+
+# Calculate the Z score
+z = (nnd - r.nnd) / SE.NND
+```
+We can then display our results in a table.
+```{r Nearest Neighbout, echo=TRUE, eval=TRUE, warning=FALSE}
+# Create the table
+table3 <- tableGrob(nndResults)
+
+# Add the caption as a textGrob
+caption <- textGrob("Table 3: NND results for the size of fires in summer 2021.", 
+                  gp = gpar(fontsize = 14, fontface = "bold"), 
+                    x = 0, hjust = 0)
+
+# Combine the caption and the table
+nnd_table <- arrangeGrob(caption, table3, ncol = 1, heights = c(0.2, 1))
+
+# Export the table with the caption as a PNG file
+png("Output_Table3.png", width = 1000, height = 600, res = 150)  # Adjust size and resolution
+grid.draw(nnd_table)
+dev.off()
+```
+![Output_Table3](https://github.com/user-attachments/assets/f4d82e8c-59f1-436a-a6d8-c1e3f77259f9)
 
 
 ## Results
