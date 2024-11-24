@@ -6,11 +6,11 @@ November, 2024
 
 ## Introduction
 
-Each summer BC experiences raging wildfire activity across the province, destroying everything in its path such as wildlife habitats and residential communities. Damage such as altered drainage systems, unstabilized exposed soils, and destroyed infrastructure posed to these communities is detrimental and can last for years before full recovery is achieved (BC Wildfire Service, 2023). Furthermore, due to wildfire resulting in ground instability, post-fire hazards such as soil erosion, floods, landslides, and avalanches become an increasing concern (BC Wildfire Service, 2023). It is hypothesized that the rising temperatures experienced from May to September can be correlated with increased wildfire frequency and size in BC, suggesting wildfires may be a direct concequence of climate (Xu, 2014). Using this theory, high temperature factors such as drier soils and reduced fuel moisture can be linked to the location of wildfires in BC, providing a deeper understanding of what may have contributed to the dramatic rise in fire activity during the summer (Xu, 2014).
+Each summer BC experiences raging wildfire activity across the province, destroying everything in its path such as wildlife habitats and residential communities. Damage such as altered drainage systems, unstabilized exposed soils, and destroyed infrastructure posed to these communities is detrimental and can last for years before full recovery is achieved (BC Wildfire Service, 2023). Furthermore, due to wildfire resulting in ground instability, post-fire hazards such as soil erosion, floods, landslides, and avalanches become an increasing concern (BC Wildfire Service, 2023). It is hypothesized that the rising temperatures experienced from May to September can be correlated with increased wildfire frequency and size in BC, suggesting wildfires may be a direct concequence of climate (Xu, 2014). Using this theory, the byproducts of high temperature such as drier soils and reduced fuel moisture can be linked to the location of wildfires in BC, providing a deeper understanding of what may have contributed to the dramatic rise in fire activity during the summer (Xu, 2014).
 
-The objective of this tutorial is to use RStudio to determine if temperature is correlated to the location and size of wildfires in BC in the summer of 2021. To conduct the following research, descriptive statistics, point pattern analysis, spatial autocorrelation, spatial interpolation and geographically weighted regression techniques will be conducted. Given the results of this study ideally we can answer further questions such as what patterns we might expect to see moving forward with inreasing temperatures each year due to anthropogenic climate change. 
+The objective of this tutorial is to utilize RStudio and its tools to analyze the correlation between temperature, location, and wildfire size in British Columbia during the summer of 2021. To conduct the following research, descriptive statistics, point pattern analysis, spatial autocorrelation, spatial interpolation and geographically weighted regression techniques will be conducted. Building on the results of this study, we can aim to address further questions, such as identifying potential patterns in wildfire behavior as temperatures continue to rise annually due to anthropogenic climate change.
 
-Results from the above statistical techniques will be displayed as tables, maps, and graphs throughout this tutorial.
+Results from the above statistical techniques will be displayed as tables, maps, and graphs using RStudio libraries throughout this tutorial.
 
 The first step is to install the desired packages. When a package is installed using the function intsall.packages("package") it is stored in a directory called the library (https://www.datacamp.com/doc/r/packages, 2024). These libraries are collections of pre-written code used to complete specific tasks while still maintaining control over R's flow (Woke, 2023). They are beneficial as they act like a short cut, reducing the amount of code needed to be written and can be called upon in the script when needed (Woke, 2023). To install a library we use the code library("package"). After installation of the library R will contain documentation specifying proper syntax and use for that package. This information can be found under Packages in the panel on the bottom right side of the page. The below packages are what will be used for this studies statistical analyses.
 
@@ -46,7 +46,7 @@ setwd(dir)
 ## Study Area
 British Columbia, Canada was selected to determine temperature impacts on wildfires from May to September, 2021 because of its dense forested area and ongoing history of wildfire occurance.  
 
-To display the study area we will now create a map of BC which includes all the fire points as well as the mean center. The first step will be to load in the boundary shapefile and set the coordinate reference system (CRS) of the BC bounadry to EPSG:4326, which corresponds to the WGS84 geographic coordinate system (latitude and longitude).
+To display the study area we will create a map of BC which includes all the fire points as well as the mean center. The first step will be to load in the boundary shapefile and set the coordinate reference system (CRS) of the BC bounadry to EPSG:4326, which corresponds to the WGS84 geographic coordinate system (latitude and longitude).
 
 ```{r Load in Shapefile, echo=TRUE, eval=TRUE, warning=FALSE}
 #maps package
@@ -68,7 +68,7 @@ coords2 <- meanCenter[, c("long", "lat")]
 crs2 <- CRS("+init=epsg:4326")
 meanCenterPoint <- SpatialPointsDataFrame(coords = coords2, data = meanCenter, proj4string = crs2)
 ```
-Using the tmap package we installed earlier we now create and print the map as a PNG with a caption (TmMap.png). This output will be found in your working directory.
+Using the tmap package installed earlier, we can now create and print the map as a PNG with a caption (TmMap.png). This map output will be found in your working directory under the designated name. For example, in my case it will be a png file named TmMap.
 ```{r Creating Map, echo=TRUE, eval=TRUE, warning=FALSE}
 map_TM <- tm_shape(bc_boundary) + 
   tm_fill(col = "gray50") +  
@@ -227,7 +227,6 @@ barGraph <- df %>% # store graph in bar graph variable and pass data frame as fi
     plot.caption = element_text(hjust = 0.5)
   )
 
-barGraph
 png("Output_BarGraph.png")
 barGraph
 dev.off()
@@ -307,15 +306,22 @@ output_file_path <- csv_file_name
 write.csv(data, file = output_file_path, row.names = FALSE)
 }
 ```
-We then merge station metadata and the aggregated temperature data using the common row Native.ID. After this the last two columns which are duplicate Latitude and Longitude are removed. 
+We then merge station metadata and the aggregated temperature data using the common column, Native.ID. After this the last two columns which are duplicate Latitude and Longitude are removed. 
 ```{r Cleaning Data, echo=TRUE, eval=TRUE, warning=FALSE}
+# Read in metadata
 metadata <- read.csv("./station_metadata.csv")
+
+# Read in climatedata
 climatedata <- read.csv("./BC_AVG_TEMP.csv")
+
+# Merge meta and climate data using Native.ID column
 merged_data <- merge(metadata, climatedata, by = "Native.ID")
 merged_data <- merged_data[, -((ncol(merged_data)-1):ncol(merged_data))]
+
+# Remove duplicate columns
 colnames(merged_data)[colnames(merged_data) %in% c("Latitude.x", "Longitude.x")] <- c("Longitude", "Latitude")
 ```
-Now omit NA and erroneous temperature values.
+Omit NA and erroneous temperature values.
 ```{r Cleaning Data, echo=TRUE, eval=TRUE, warning=FALSE}
 merged_data <- na.omit(merged_data)
 merged_data <- merged_data[merged_data$TEMP <= 100, ]
@@ -341,7 +347,10 @@ st_write(climate_sf, "ClimateData.shp")
 ```
 Load in the shapefiles that will be used to create our map.
 ```{r Mapping Cleaning Data, echo=TRUE, eval=TRUE, warning=FALSE}
+# Load in climate shapefile
 climate_sf <- st_read("ClimateData.shp")
+
+# Load in BC boundary shapefile
 bc_boundary <- st_read("BC_bound.shp")
 bc_boundary <- st_set_crs(bc_boundary, 4326)
 ```
@@ -372,8 +381,64 @@ ggsave("Temperature_Map_BC.png", plot = map, width = 10, height = 8, dpi = 300)
 
 ## Methods
 ### Evaluating Spatial Distribution of Wildfires
+To evaluate the spatial distribution of wildfires acros BC from May 1st to September 1st, 2021 a density map of wildfires over this time period will be created followed by point pattern analysis of the wildfire data. 
 
-### 
+The density map will be a raster dataset representation of points per unity area across the province. The desired outcome will show us the general spread of wildfire points as well as where they are concentrated in BC.
+
+To begin, using the pre-loaded fire dataset (data) convert the fire points to a spatial object. Then transform the points to CRS projection 3005 so that they align and plot on our BC boundary map.
+```{r Density Map, echo=TRUE, eval=TRUE, warning=FALSE}
+# Convert to sf object
+fire_point <- st_as_sf(fire_point, coords = c("LONGITUDE", "LATITUDE"), crs = 4326)
+fire_point <- st_transform(fire_point, crs = 3005) 
+```
+Using the pre-loaded BC boundary shapefile (bc_bound) extract the bounding box of BC and create a raster template. Note that the raster resolution can be changed to any desired resolution.
+```{r Density Map, echo=TRUE, eval=TRUE, warning=FALSE}
+# Ensure bbox2 is valid and formatted correctly
+bbox2 <- st_bbox(bc_bound)
+# Creating raster templace
+raster_res <- 50000  # This resolution in 50000 meters 
+raster_template <- raster(extent(bbox2), res = c(raster_res, raster_res))
+```
+Calculate the density of fire points using kernel density estimation, fill missing values (NA) in the raster with zeros and convert fire points into a raster grid.
+```{r Density Map, echo=TRUE, eval=TRUE, warning=FALSE}
+density_raster <- raster::rasterize(st_as_sf(fire_point), raster_template, fun = "count", field = 1)
+density_raster[is.na(density_raster)] <- 0
+```
+Now convert the raster (density_raster) into a data frame (density_df) and again replace NA values in the data frame with zeros. The raster's column for fire values is renamed from layer to fires. After this, spatial analysis requires us to convert the density data frame back to an sf object.
+```{r Density Map, echo=TRUE, eval=TRUE, warning=FALSE}
+# Convert the raster to a data frame and replace any potential NAs with zeros
+density_df <- as.data.frame(density_raster, xy = TRUE)
+density_df[is.na(density_df)] <- 0
+
+# Step to rename the 'layer' column to 'fires'
+colnames(density_df)[colnames(density_df) == "layer"] <- "fires"
+
+# Convert to a spatial points data frame using sf (if needed later)
+density_sf <- st_as_sf(density_df, coords = c("x", "y"), crs = st_crs(bc_bound))
+```
+Export the density points as a shapefile.
+```{r Density Map, echo=TRUE, eval=TRUE, warning=FALSE}
+st_write(density_sf, "density_points.shp", delete_dsn = TRUE)
+```
+We are now ready to plot our density points on a simple map using the following code. Again, the map will save to your working directory as a png file.
+```{r Density Map, echo=TRUE, eval=TRUE, warning=FALSE}
+# Create a simple map
+ggplot() +
+  geom_sf(data = bc_bound, fill = NA, color = "black") +  # Plot the boundary polygon
+  geom_sf(data = density_sf, aes(color = fires), size = 1) +  # Plot the density points with color mapping
+  scale_color_viridis_c(option = "plasma", name = "Density of Fires") +  # Color scale for density values
+  theme_minimal() +
+  labs(title = "Density of Fires within Boundary",
+       x = "Longitude",
+       y = "Latitude",
+       caption = "Figure 5: A simple map displaying the density of fires across British Columbia. The colour scale reflects the relative density of fires within each mapped grid cell.")
+       +
+         ggsave("density_of_fires_map.png", width = 10, height = 7, dpi = 300))
+```
+![density_of_fires_map](https://github.com/user-attachments/assets/1edcc0cf-a9af-48b1-a0d7-a86b6a0b50ed)
+
+We will now conduct point pattern analysis 
+
 
 ## Results
 Provided our results from descriptive statistics we can 
