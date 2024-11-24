@@ -234,9 +234,6 @@ dev.off()
 ```
 ![Output_Histogram](https://github.com/user-attachments/assets/1a980e85-5c59-4da3-8a1f-41ebeafe5176) ![Output_BarGraph](https://github.com/user-attachments/assets/f58e62c6-3356-4643-8d80-202b407ea7a1)
 
-
-
-
 ### Data
 To conduct this report historical fire point data was collected from the BC Data Catalogue database, retrieved from https://catalogue.data.gov.bc.ca/dataset/bc-wildfire-fire-perimeters-historical. The fire data includes relevant information such as fire number, fire year, ignition date, latitude, longitude and fire size (ha). Temperature data was collected from the Weather Station Data Portal from the Pacific Climate Impacts Consortium (PCIC), retreived from https://services.pacificclimate.org/met-data-portal-pcds/app/. The temperature data was parameterized to be collected from May 1st, 2021 to September 1st, 2021 from the WMB network and includes wind direction, relative humidity, average wind speed, precipitation, temperature and time.
 
@@ -259,7 +256,7 @@ Each CSV file is then looped through, reading the file into the datafram hourly_
 for (file in csv_files) {
     hourly_data <- read.csv(file, skip = 1, header = TRUE)
 ```
-Time is then converted into a desired datetime format. 
+Time is then converted into a desired datetime format. In this case we want hourly temperature data from May to September, 2021.
 ```{r Cleaning Data, echo=TRUE, eval=TRUE, warning=FALSE}
 hourly_data$temperature <- as.numeric(hourly_data$temperature)
 hourly_data <- hourly_data %>%
@@ -327,7 +324,59 @@ Finally save the cleaned, merged dataset to your working directory as ClimateDat
 ```{r Cleaning Data, echo=TRUE, eval=TRUE, warning=FALSE}
 write.csv(merged_data, file = "ClimateData.csv", row.names = FALSE)
 ```
+To ensure the data has been correctly cleaned we will now map our newley created climate data and visualize the temperature points across BC. To begin this process read in the 'ClimateData' CSV file.
+```{r Mapping Cleaning Data, echo=TRUE, eval=TRUE, warning=FALSE}
+climate_data <- read.csv("ClimateData.csv")
+```
+Next we must format the latitude and longitude by using the function mutate() from the dplyr package. This is to ensure that the Latitude and Longitude columns are numeric for spatial processing.
+```{r Mapping Cleaning Data, echo=TRUE, eval=TRUE, warning=FALSE}
+climate_data <- climate_data %>%
+   mutate(Latitude = as.numeric(Latitude),
+        Longitude = as.numeric(Longitude))
+```
+Following this step we will convert the data to a simple feature object, set the CRS to 4326 and save the new simple feature as a shapefile. 
+```{r Mapping Cleaning Data, echo=TRUE, eval=TRUE, warning=FALSE}
+climate_sf <- st_as_sf(climate_data, coords = c("Longitude", "Latitude"), crs = 4326)
+st_write(climate_sf, "ClimateData.shp")
+```
+Load in the shapefiles that will be used to create our map.
+```{r Mapping Cleaning Data, echo=TRUE, eval=TRUE, warning=FALSE}
+climate_sf <- st_read("ClimateData.shp")
+bc_boundary <- st_read("BC_bound.shp")
+bc_boundary <- st_set_crs(bc_boundary, 4326)
+```
+Create the map and save it as a png to the working directory.
+```{r Mapping Cleaning Data, echo=TRUE, eval=TRUE, warning=FALSE}
+# Create the map
+map <- ggplot() +
+  geom_sf(data = bc_boundary, fill = "lightgrey", color = "black") +
+  # Map the TEMP variable to color
+  geom_sf(data = climate_sf, aes(color = TEMP), size = 2) + 
+  scale_color_gradient(low = "blue", high = "red") + # Adjust color gradient as needed
+  theme_minimal() +
+  labs(
+    title = "Map of Temperature Data Points in British Columbia",
+    subtitle = "Overlayed on BC Boundary",
+    x = "Longitude",  # Use Longitude for x-axis
+    y = "Latitude",   # Use Latitude for y-axis
+    color = "Temperature (°C)", # Label for color legend
+    caption = "Figure 4: Spatial distribution of temperature data points across British Columbia."
+  ) +
+  theme(legend.position = "bottom")
 
+# Save the map as a PNG file
+ggsave("Temperature_Map_BC.png", plot = map, width = 10, height = 8, dpi = 300)
+```
+![Temperature_Map_BC](https://github.com/user-attachments/assets/25feec0e-8916-41f5-8707-cf32ddd22922)
+
+
+## Methods
+### Evaluating Spatial Distribution of Wildfires
+
+### 
+
+## Results
+Provided our results from descriptive statistics we can 
 
 ## References
 
