@@ -499,7 +499,40 @@ dev.off()
 ```
 ![Output_Table3](https://github.com/user-attachments/assets/f4d82e8c-59f1-436a-a6d8-c1e3f77259f9)
 
+#### Quadrat Analysis
+Quadrat analysis can be defined as a mathematical and statistical technique to measure properties of point patterns (Thomas, 1977). This method divides our BC study area into quadrats and analyzes the density of wildfire points in each quadrat (Thomas, 1977). It does this to test if our spatial patterns are significantly different from random.
 
+For the quadrat analysis performed in this study we are using a study area of approximately 947848424073 square meters divided into 144 quadrats (12x12). By using 144 quadrats each quadrat has an area of approximately 1 square kilometere. The following code converts the fire points to a planar point pattern object, main class for point pattern analysis in spatstat. It then divides the study area into a grid of quadrats and counts the number of fire points in each quadrat. The density of points are stored in a data frame (qcount.df).
+```{r Quadrat Analysis, echo=TRUE, eval=TRUE, warning=FALSE}
+# Convert fire_point to an sf object using LATITUDE and LONGITUDE
+fire_point_sf <- st_as_sf(fire_point, coords = c("LONGITUDE", "LATITUDE"), crs = 3005)
+# Extract the bounding box of the spatial data (fire_ext) to define the study area's extent
+fire_ext <- as.matrix(st_bbox(fire_point_sf))
+
+#Now create the observation window. 
+#Spatstat needs this for calculating the area of your study site, which is needed 
+#for the various statistics like NND
+window <- as.owin(list(xrange = c(fire_ext[1], fire_ext[3]), 
+                       yrange = c(fire_ext[2], fire_ext[4])))
+
+#Finally, create a ppp object for fire.
+fire.ppp <- ppp(x = st_coordinates(fire_point_sf)[,1], 
+                y = st_coordinates(fire_point_sf)[,2], 
+                window = window)
+
+# Determine number of quadrats
+# Study area = 947.8 km^2 and number of points = 1472
+quads <- 12
+
+qcount <- quadratcount(fire.ppp, nx = quads, ny = quads)
+
+# Count the number of quadrats with a distinct number of points, this will be used in your Quadra Analysis formula below
+qcount.df <- plyr::count(qcount.df,'Freq')
+
+# Change the column names so that x=number of points and f=frequency of quadrats with x point
+colnames(qcount.df) <- c("x","f")
+```
+We are 
 ## Results
 Provided our results from descriptive statistics we can 
 
