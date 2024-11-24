@@ -195,17 +195,13 @@ dev.off()
 To analyse the size frequency of fires as well as the frequency of fires per month in BC during the summer of 2021 we can create a histogram and bar graph using the following code. 
 ```{r DescriptiveStats, echo=TRUE, eval=TRUE, warning=FALSE}
 # Histogram to display the size frequency of fires
+png("Output_Histogram.png")
 hist(df$SIZE_HA, breaks = 30, main = "Summer 2021: Frequency of Wild Fire Sizes", xlab = "Size of Wild Fire (ha)")
-png("Output_Histogram.png") 
+mtext("Figure 2. Frequency of wildfire sizes during the Summer of 2021.\nWildfire sizes are shown in hectares (ha), with 30 bins.", 
+      side = 1, line = 5, outer = FALSE, adj = 0)
 dev.off()
 
-# Histogram to display the frequency of fires/month
-# Convert IGN_DATE to Date format
-df$IGN_DATE <- as.Date(substr(df$IGN_DATE, 1, 8), format = "%Y%m%d"
-# Add a new column for the month of the ignition date
-df$IGN_Month <- format(df$IGN_DATE, "%B")  # Converts to full month names (e.g., "January")
-
-# Bar Graph
+# Bar Graph to display frequency of fires per month
 sumMay = sum(subset(df, IGN_Month == "May")$SIZE_HA, na.rm = TRUE) 
 sumJun = sum(subset(df, IGN_Month == "June")$SIZE_HA, na.rm = TRUE) 
 sumJul = sum(subset(df, IGN_Month == "July")$SIZE_HA, na.rm = TRUE) 
@@ -223,7 +219,7 @@ barGraph <- df %>% # store graph in bar graph variable and pass data frame as fi
     title = "Total Burned Area by Month 2021", 
     x = "Month", 
     y = "Total Burned Area (ha)", 
-    caption = "Figure 2: Total fire size by month in 2021"
+    caption = "Figure 3: Total fire size by month in 2021"
   ) + 
   theme_classic() + #set the theme to classic (removes background and borders etc.)
   theme(
@@ -236,7 +232,8 @@ png("Output_BarGraph.png")
 barGraph
 dev.off()
 ```
-![Output_Histogram](https://github.com/user-attachments/assets/bbd20d26-e350-49e4-8d75-411aac615637) ![Output_BarGraph](https://github.com/user-attachments/assets/764fc372-88a0-4d16-b9f3-fe41abdb5317)
+![Output_Histogram](https://github.com/user-attachments/assets/1a980e85-5c59-4da3-8a1f-41ebeafe5176) ![Output_BarGraph](https://github.com/user-attachments/assets/f58e62c6-3356-4643-8d80-202b407ea7a1)
+
 
 
 
