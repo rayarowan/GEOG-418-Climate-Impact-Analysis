@@ -35,6 +35,7 @@ library(gstat)
 library(ggplot2) 
 library(dplyr)   
 library(viridis)
+library(grid)
 ```
 The next step is to set the working directory. This will be the folder or location on your computer that R pulls files from and saves your work to. Do set the working directory use the code dir <- "name of folder/location" followed by setwd(dir). An example of how this is done can be viewed below. I am pulling my data stored in a folder labeled Assignment 4 within a folder labelled GEOG 418 located on my desktop.
 
@@ -439,7 +440,7 @@ ggplot() +
 ![density_of_fires_map](https://github.com/user-attachments/assets/1edcc0cf-a9af-48b1-a0d7-a86b6a0b50ed)
 
 #### Point Pattern Analysis
-#### Is the Relative Size of Wildfires Location Dependant Across BC in Summer 2021?
+#### Is the Relative Size and Frequency of Wildfires Location Dependant Across BC in Summer 2021?
 To answer this question, this tutorial will explain how to perform three different statistical tests that  determine if the wildfire size data are showing random, dispersed or clustered spatial patterns.
 
 #### Nearest Neighbour Analysis
@@ -509,13 +510,13 @@ fire_point_sf <- st_as_sf(fire_point, coords = c("LONGITUDE", "LATITUDE"), crs =
 # Extract the bounding box of the spatial data (fire_ext) to define the study area's extent
 fire_ext <- as.matrix(st_bbox(fire_point_sf))
 
-#Now create the observation window. 
+# Now create the observation window. 
 #Spatstat needs this for calculating the area of your study site, which is needed 
 #for the various statistics like NND
 window <- as.owin(list(xrange = c(fire_ext[1], fire_ext[3]), 
                        yrange = c(fire_ext[2], fire_ext[4])))
 
-#Finally, create a ppp object for fire.
+# Finally, create a ppp object for fire.
 fire.ppp <- ppp(x = st_coordinates(fire_point_sf)[,1], 
                 y = st_coordinates(fire_point_sf)[,2], 
                 window = window)
@@ -532,8 +533,77 @@ qcount.df <- plyr::count(qcount.df,'Freq')
 # Change the column names so that x=number of points and f=frequency of quadrats with x point
 colnames(qcount.df) <- c("x","f")
 ```
-We are now ready to calculate the variance ($$VAR = \frac{\Sigma f_ix_i^2 - [\frac{(\Sigma f_ix_i)^2}{m}]}{m-1}$$) and variance to mean ($$\frac{\text{VAR}}{\text{MEAN}}$$) quadrat statistics.
+We are now ready to calculate the variance ($$VAR = \frac{\Sigma f_ix_i^2 - [\frac{(\Sigma f_ix_i)^2}{m}]}{m-1}$$), variance to mean ($$VMR = \frac{\text{VAR}}{\text{MEAN}}$$), and chisquare quadrat statistics.
+```{r Quadrat Analysis, echo=TRUE, eval=TRUE, warning=FALSE}
+#Caluclate the Quadrat Analysis statistics
+sum.f.x2 <- sum(qcount.df$f * (qcount.df$x^2))
+M <- sum(qcount.df$f)
+N <- sum(qcount.df$x * qcount.df$f)
+sum.fx.2 <- (sum(qcount.df$x * qcount.df$f)) ^ 2
+VAR <- ((sum.f.x2) - (sum.fx.2 / M)) / (M - 1)
+MEAN <- N/M
+VMR <- VAR/MEAN
 
+# Finally, perform the test statistic to test for the existence of a random spatial pattern
+chi.square = VMR * (M - 1)
+p = 1 - pchisq(chi.square, (M - 1))
+
+quadResults <- data.frame(Quadrats = quads * quads, 
+                          Variance = round(VAR, 2), 
+                          Mean = round(MEAN, 2), 
+                          VMR = round(VMR, 2), 
+                          Chisquare = round(chi.square, 2))
+
+# Create the table
+table4 <- tableGrob(quadResults)
+
+# Add the caption as a textGrob
+caption <- textGrob("Table 4: Quadrat analysis results for the frequency of fires in summer 2021.", 
+                    gp = gpar(fontsize = 14, fontface = "bold"), 
+                    x = 0, hjust = 0)
+
+# Combine the caption and the table
+quad_table <- arrangeGrob(caption, table4, ncol = 1, heights = c(0.2, 1))
+
+# Export the table with the caption as a PNG file
+png("Output_Table4.png", width = 1000, height = 600, res = 150)  # Adjust size and resolution
+grid.draw(quad_table)
+dev.off()
+```
+![Output_Table4](https://github.com/user-attachments/assets/de68401a-3a92-4492-aaee-57ac481ad108)
+
+#### K-Function
+The K function is a unique spatial statistic that can be used to assess the dependence between locations at varying distances (Moraga, 2024). The formula for the K-function is as follows:
+
+$$K_{d} = \lambda^{-1}E(N_d)$$
+
+Where λ is the intensity function of the spatial point process. We can see that the K-function also requires the input of $$N_d$$, the number of points within a distance (d) of a randomly selected point. Putting the equation together we can determine if there is either more clustering or dispersion than expected compared to complete spatial randomness (Moraga, 2024). When the k-function plots above $$K_{CSR}$$ the distribution is clustered while plotting below means it is dispersed.
+
+To calculate complete spatial randomness the following equation is used:
+
+$$K_{CSR}(d) = \pi d^2$$
+
+Code used to obtain the K-function for wildfire points is below.
+```{r K Function, echo=TRUE, eval=TRUE, warning=FALSE}
+#Create a basic k-function
+k.fun <- Kest(fire.ppp, correction = "Ripley")
+
+# Use simulation to test the point pattern against CSR
+k.fun.e <- envelope(fire.ppp, Kest, nsim = 99, correction = "Ripley", verbose = FALSE)
+plot(k.fun.e, main = "Basic K-Function of Fires")
+```
+![Basic K-function](https://github.com/user-attachments/assets/5b13db8c-7f2f-4034-aab0-32d8d8483ddd)
+
+#### Where are the Fire Hotspots Located?
+#### Kernal Density Estimation
+
+The code to obtain the kernal density estimation is below.
+```{r Kernal Density, echo=TRUE, eval=TRUE, warning=FALSE}
+# Kernal Density using the cross-validation bandwidth
+kde.fire <- density.ppp(fire.ppp, sigma = bw.diggle(fire.ppp))
+plot(kde.fire, main = "Kernel Density Estimation of Fires")
+```
+![Kernal Density](https://github.com/user-attachments/assets/dfc341de-4fa2-428e-8b75-9af4c4a7c8db)
 
 ## Results
 Provided our results from descriptive statistics we can 
