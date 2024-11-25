@@ -22,6 +22,12 @@ install.packages("spdep")
 install.packages("raster")
 install.packages("e1071")
 install.packages("spgwr")
+install.packages("sf")
+install.packages("gstat")
+install.packages(""ggplot2")
+install.packages("dplyr")
+install.packages("viridis")
+install.packages("grid")
 
 #Load in libraries:
 library("knitr")
