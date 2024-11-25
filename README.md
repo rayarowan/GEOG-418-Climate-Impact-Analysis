@@ -583,7 +583,7 @@ To calculate complete spatial randomness the following equation is used:
 
 $$K_{CSR}(d) = \pi d^2$$
 
-Code used to obtain the K-function for wildfire points is below.
+Code used to obtain the K-function for wildfire points is below. The black line represents the K-function, $$K_{d}$$ and the red line the random distribution of the same data, $$K_{CSR}(d)$$.
 ```{r K Function, echo=TRUE, eval=TRUE, warning=FALSE}
 #Create a basic k-function
 k.fun <- Kest(fire.ppp, correction = "Ripley")
