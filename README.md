@@ -446,8 +446,8 @@ ggplot() +
 ![density_of_fires_map](https://github.com/user-attachments/assets/1edcc0cf-a9af-48b1-a0d7-a86b6a0b50ed)
 
 #### Point Pattern Analysis
-#### Is the Relative Size and Frequency of Wildfires Location Dependant Across BC in Summer 2021?
-To answer this question, this tutorial will explain how to perform three different statistical tests that  determine if the wildfire size data are showing random, dispersed or clustered spatial patterns.
+##### Is the Relative Size and Frequency of Wildfires Location Dependant Across BC in Summer 2021?
+To answer this question, this tutorial will explain how to perform three different statistical tests; nearest neighbour analysis, quadrat analysis and k-function. These will determine if the wildfire size data are showing random, dispersed or clustered spatial patterns. To summarize point pattern analysis we will also perform a kernel density estimation based on the statistical test results. 
 
 #### Nearest Neighbour Analysis
 Nearest neighbour analysis is a technique used to determine if points nearby one another display a random, dispersed or clustered pattern (Corvec et al., 2013). It does this by comparing the mean distance between nearest neighbors (Corvec et al., 2013). This distance helps determine how similar or dissimilar two data points are. To determine if our pattern is clustered or disperced we then compared the distance to the average nearest neighbour distance generated using a random pattern for an area with the same spatial density of points.
