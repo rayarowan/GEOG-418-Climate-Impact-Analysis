@@ -199,12 +199,16 @@ dev.off()
 ```
 ![Output_Table1](https://github.com/user-attachments/assets/9a8ab686-fc92-4e70-b5d9-0f177b5e03b1) ![Output_Table2](https://github.com/user-attachments/assets/533ccb07-eac1-4e3a-836b-ae1c0c3022ce)
 
+The descriptive statistics suggest that the mean wildfire size is approximately 588 ha. However, due to a high standard deviation (5172.356) and extremely right-skewed distribution (13.886), the mean is not be an accurate representation of the average wildfire size. Instead, it was likely that during the 2021 summer, most fires were relatively small (0.009 ha) with a few very large fires representing the outlier data points and skewing the data.
+
 To analyse the size frequency of fires as well as the frequency of fires per month in BC during the summer of 2021 we can create a histogram and bar graph using the following code. 
 ```{r DescriptiveStats, echo=TRUE, eval=TRUE, warning=FALSE}
 # Histogram to display the size frequency of fires
 png("Output_Histogram.png")
-hist(df$SIZE_HA, breaks = 30, main = "Summer 2021: Frequency of Wild Fire Sizes", xlab = "Size of Wild Fire (ha)")
-mtext("Figure 2. Frequency of wildfire sizes during the Summer of 2021.\nWildfire sizes are shown in hectares (ha), with 30 bins.", 
+hist(log10(df$SIZE_HA), breaks = 30,
+     main = "Summer 2021: Frequency of Wild Fire Sizes",
+     xlab = "Log(Size of Wild Fire, ha)")
+mtext("Figure 2. Frequency of wildfire sizes (ha) during the Summer of 2021 using a log scale.", 
       side = 1, line = 5, outer = FALSE, adj = 0)
 dev.off()
 
@@ -238,7 +242,9 @@ png("Output_BarGraph.png")
 barGraph
 dev.off()
 ```
-![Output_Histogram](https://github.com/user-attachments/assets/1a980e85-5c59-4da3-8a1f-41ebeafe5176) ![Output_BarGraph](https://github.com/user-attachments/assets/f58e62c6-3356-4643-8d80-202b407ea7a1)
+![Output_Histogram](https://github.com/user-attachments/assets/b01b4443-aca1-4eff-b7f1-3c1d04fa807a) ![Output_BarGraph](https://github.com/user-attachments/assets/f58e62c6-3356-4643-8d80-202b407ea7a1)
+
+Based on the histogram results it is apparent that there were wildfires of varying sizes, with larger fires having occurred less frequently than smaller fires and the average fire size being 0.009 ha (representative of the calculated mode). The bar graph indicates that during summer 2021 the month of July experienced the highest frequency of fires, followed by June, August then May. 
 
 ### Data
 To conduct this report historical fire point data was collected from the BC Data Catalogue database, retrieved from https://catalogue.data.gov.bc.ca/dataset/bc-wildfire-fire-perimeters-historical. The fire data includes relevant information such as fire number, fire year, ignition date, latitude, longitude and fire size (ha). Temperature data was collected from the Weather Station Data Portal from the Pacific Climate Impacts Consortium (PCIC), retreived from https://services.pacificclimate.org/met-data-portal-pcds/app/. The temperature data was parameterized to be collected from May 1st, 2021 to September 1st, 2021 from the WMB network and includes wind direction, relative humidity, average wind speed, precipitation, temperature and time.
