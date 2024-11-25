@@ -600,7 +600,6 @@ plot(k.fun.e, main = "Basic K-Function of Fires")
 ```
 ![Basic K-function](https://github.com/user-attachments/assets/bb82b9c6-958d-4a8f-8067-4cf8e802b151)
 
-
 #### Where are the Fire Hotspots Located?
 #### Kernel Density Estimation
 The kernel density estimation (KDE) is used to estimate the probability density function of a random variable (Węglarczyk et al., 2018). The KDE uses a kernal (mathematical function) to produce a smooth estimate that uses all locations of data points (Węglarczyk et al., 2018). The estimation allows us to identify clustering or dispersion features of the data more accurately than via histogram (Węglarczyk et al., 2018). The formula used to obtain the KDE is as follows: 
@@ -626,9 +625,73 @@ The following formula is used to calculate IDW:
 
 $$Z_i = \frac{\sum_{j=1}^{n}\frac{z_j}{d_{ij}^p}}{\sum_{j=1}^{n}\frac{1}{d_{ij}^p}}$$
 
+In R, we can create an IDW temperature surface and clip that to the boundary of BC. This allows us to create a map of BC that displays our interpolated IDW temperature surface. 
+To begin, make sure the climate data shapefile is read in. For this interpolation I am using a CRS of 3005.
+```{r IDW, echo=TRUE, eval=TRUE, warning=FALSE}
+# Read the shapefile
+climate_data <- st_read("ClimateData.shp")
+climate_data <- st_set_crs(climate_data, 4326)
+climate_data <- st_transform(climate_data, crs = 3005)
+```
+The first step in our interpolation is to create a grid. I chose to use a resolution 50km, you can change this value to obtain the desired outcome. 
+```{r IDW, echo=TRUE, eval=TRUE, warning=FALSE}
+# Create a grid for the interpolation
+bbox <- st_bbox(climate_data)
+grid <- st_make_grid(st_as_sfc(bbox), cellsize = c(50000, 50000), crs = st_crs(climate_data))
+```
+The interpolation can now be performed. To better visualize and process the result we can convert it into a sf object.
+```{r IDW, echo=TRUE, eval=TRUE, warning=FALSE}
+# Interpolate using IDW
+idw_result <- gstat::idw(TEMP ~ 1, 
+                         locations = climate_data, 
+                         newdata = st_as_sf(grid), 
+                         idp = 2)
 
+# Convert idw_result to an sf object
+idw_sf <- st_as_sf(idw_result)
+```
+Now we will clip the interpolated data to the BC boundary. Load in the BC boundary like we did above in this tutorial and transform the CRS of the IDW results to match the CRS of the boundary. This ensures compatibility for clipping.
+```{r IDW, echo=TRUE, eval=TRUE, warning=FALSE}
+# Load the polygon shapefile for clipping
+bc_boundary <- st_read("BC_bound.shp")
+bc_boundary <- st_set_crs(bc_boundary, 4326)
 
+# Step to transform the CRS of either shapefile if they do not match
+if (crs_idw != crs_polygon) {
+  # Transform the IDW result to match the CRS of the polygon
+  idw_sf <- st_transform(idw_sf, crs = crs_polygon)  # Transform IDW result to polygon's CRS
+  message("Transformed IDW result CRS to match the polygon.")
+} else {
+  message("CRS of IDW result and polygon already match.")
+}
+```
+Now clip and intersect the data.
+```{r IDW, echo=TRUE, eval=TRUE, warning=FALSE}
+idw_clipped <- st_intersection(idw_sf, bc_boundary)
+```
+The last step is to make a map of the clipped results and save our output.
+```{r IDW, echo=TRUE, eval=TRUE, warning=FALSE}
+# Create the map of the clipped results
+ggplot(data = idw_clipped) +
+  geom_sf(aes(fill = var1.pred), color = NA) +  # Fill based on predicted temperature values
+  scale_fill_viridis_c(option = "D") +  # Use viridis color scale for better readability
+  labs(
+    title = "Clipped IDW Interpolation of Temperature",
+    fill = "Temperature (°C)",  # Legend label
+    x = "Longitude", 
+    y = "Latitude",
+    caption = "Figure 8: IDW interpolation clipped to BC boundary showing predicted temperature distribution."
+  ) +
+  theme_minimal() +
+  theme(legend.position = "right")
 
+# Save the map as an image file (optional)
+ggsave("Clipped_IDW_Interpolation_Map.png", width = 10, height = 8, dpi = 300)
+```
+![Clipped_IDW_Interpolation_Map](https://github.com/user-attachments/assets/01a078fc-cd47-47a8-9479-8294bf175eed)
+
+#### Ordinary Kriging
+Ordinary kriging is an interpolation method in which the predictor is an optimal linear predictor, and the result is a exact interpolation (Dumas et al., 2013). This simply means that each value interpolated using kriging will be the best linear unbiased estimate and that predictions at sampled points are the same as observed values (Dumas et al., 2013). This type of kriging assumes a contant mean across the domain
 
 ## Results
 Provided our results from descriptive statistics we can 
