@@ -614,7 +614,7 @@ plot(kde.fire, main = "Kernel Density Estimation of Fires")
 ### Creating Temperature Surface
 To create the temperature surface across BC using data from May 1st to September 1st, 2021, inverse distance weighting (IDW) and kriging will be used to create an interpolated surface of the temperature variable.
 #### Inverse Distance Weighting
-IDW is a surface interpolation technique in which the value at an unsampled location is estimated as a weighted average of values from nearby sampled points (Lu & Wong, 2008). It is inverse as with more distance the unsampled point is assigned less weight therefore, points closer have more influence(Lu & Wong, 2008). A power or distance-decay parameter is typically applied, adjusting how rapidly the influence diminishes with distance (Lu & Wong, 2008).
+IDW is a surface interpolation technique in which the value at an unsampled location is estimated as a weighted average of values from nearby sampled points (Lu & Wong, 2008). The relationship is inverse as with more distance between the unknown and known point, the less influence the known point has when estimating the unknown value (Lu & Wong, 2008). A power or distance-decay parameter is typically applied, adjusting how rapidly the influence diminishes with distance (Lu & Wong, 2008). 
 
 The following formula is used to calculate IDW:
 
