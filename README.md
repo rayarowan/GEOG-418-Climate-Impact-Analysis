@@ -382,7 +382,7 @@ ggsave("Temperature_Map_BC.png", plot = map, width = 10, height = 8, dpi = 300)
 
 ## Methods
 ### Evaluating Spatial Distribution of Wildfires
-To evaluate the spatial distribution of wildfires acros BC from May 1st to September 1st, 2021 a density map of wildfires over this time period will be created followed by point pattern analysis of the wildfire data. 
+To evaluate the spatial distribution of wildfires acros BC using fire point data from from May 1st to September 1st, 2021, a density map of wildfires over this time period will be created followed by point pattern analysis of the wildfire data. 
 
 #### Density Map
 The density map will be a raster dataset representation of points per unity area across the province. The desired outcome will show us the general spread of wildfire points as well as where they are concentrated in BC.
@@ -592,18 +592,37 @@ k.fun <- Kest(fire.ppp, correction = "Ripley")
 k.fun.e <- envelope(fire.ppp, Kest, nsim = 99, correction = "Ripley", verbose = FALSE)
 plot(k.fun.e, main = "Basic K-Function of Fires")
 ```
-![Basic K-function](https://github.com/user-attachments/assets/5b13db8c-7f2f-4034-aab0-32d8d8483ddd)
+![Basic K-function](https://github.com/user-attachments/assets/bb82b9c6-958d-4a8f-8067-4cf8e802b151)
+
 
 #### Where are the Fire Hotspots Located?
-#### Kernal Density Estimation
+#### Kernel Density Estimation
+The kernel density estimation (KDE) is used to estimate the probability density function of a random variable (Węglarczyk et al., 2018). The KDE uses a kernal (mathematical function) to produce a smooth estimate that uses all locations of data points (Węglarczyk et al., 2018). The estimation allows us to identify clustering or dispersion features of the data more accurately than via histogram (Węglarczyk et al., 2018). The formula used to obtain the KDE is as follows: 
 
-The code to obtain the kernal density estimation is below.
-```{r Kernal Density, echo=TRUE, eval=TRUE, warning=FALSE}
-# Kernal Density using the cross-validation bandwidth
+$$\hat\lambda_p = \frac{no. [S \in C(\boldsymbol{p, r})]}{\pi r^2}$$
+
+Each location (p) has a circle (C) with radius (r) drawn around it. Next the number (no.) of points (S) within in the circle are divided by the area of the circle. The radius of the circle is known as sigma. A smaller sigma (and smaller bandwidth) shows much more detail and allows for easier identification of hotspots than a larger sigma. While larger sigma values make hotspots less obvious, they produce a smoother image. This option may come in handy if working with noisy data or a small sample size. The outcome of this estimate is a grid of cells containing values that estimate the number of points that fall within the circle around it. 
+
+The code to obtain the kernel density estimation is below.
+```{r Kernel Density, echo=TRUE, eval=TRUE, warning=FALSE}
+# Kernel Density using the cross-validation bandwidth
 kde.fire <- density.ppp(fire.ppp, sigma = bw.diggle(fire.ppp))
 plot(kde.fire, main = "Kernel Density Estimation of Fires")
 ```
-![Kernal Density](https://github.com/user-attachments/assets/dfc341de-4fa2-428e-8b75-9af4c4a7c8db)
+![Kernal Density](https://github.com/user-attachments/assets/db3954a7-88c1-4a2c-9f7b-693e9f70a9a5)
+
+### Creating Temperature Surface
+To create the temperature surface across BC using data from May 1st to September 1st, 2021, inverse distance weighting (IDW) and kriging will be used to create an interpolated surface of the temperature variable.
+#### Inverse Distance Weighting
+IDW is a surface interpolation technique in which the value at an unsampled location is estimated as a weighted average of values from nearby sampled points (Lu & Wong, 2008). It is inverse as with more distance the unsampled point is assigned less weight therefore, points closer have more influence(Lu & Wong, 2008). A power or distance-decay parameter is typically applied, adjusting how rapidly the influence diminishes with distance (Lu & Wong, 2008).
+
+The following formula is used to calculate IDW:
+
+$$Z_i = \frac{\sum_{j=1}^{n}\frac{z_j}{d_{ij}^p}}{\sum_{j=1}^{n}\frac{1}{d_{ij}^p}}$$
+
+
+
+
 
 ## Results
 Provided our results from descriptive statistics we can 
