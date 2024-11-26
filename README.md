@@ -697,10 +697,109 @@ ggsave("Clipped_IDW_Interpolation_Map.png", width = 10, height = 8, dpi = 300)
 ![Clipped_IDW_Interpolation_Map](https://github.com/user-attachments/assets/01a078fc-cd47-47a8-9479-8294bf175eed)
 
 #### Ordinary Kriging
-Ordinary kriging is an interpolation method in which the predictor is an optimal linear predictor, and the result is a exact interpolation (Dumas et al., 2013). This simply means that each value interpolated using kriging will be the best linear unbiased estimate and that predictions at sampled points are the same as observed values (Dumas et al., 2013). This type of kriging assumes a contant mean across the domain
+Ordinary kriging is an interpolation method in which the predictor is an optimal linear predictor, and the result is a exact interpolation (Dumas et al., 2013). This simply means that each point being predicted using kriging will be the best linear unbiased estimate and that predictions at sampled points are the same as observed values with minimal variance (Dumas et al., 2013). Kriging involves the use of a semivariogram to assign weights to known data points to make predictions at unsampled locations (O’sullivan & Unwin, 2010). The main assumption of kriging is a contant mean across the domain (O’sullivan & Unwin, 2010). In this tutorial it means that the average temperature is constant across the entire domain of BC. 
+
+To perform kriging we will be working with our climate shapefile that was created earlier in this tutorial. Load in this file and use the function f.0 to define a formula for the kriging model with temperature as our variable of interest. 
+```{r Kriging, echo=TRUE, eval=TRUE, warning=FALSE}
+# Read the shapefile
+climate_data <- st_read("ClimateData.shp")
+# Define formula for kriging
+f.0 <- as.formula(TEMP ~ 1) # The 1 indicates no covariates (ordinary kriging)
+```
+Now create the semivariogram based on spatial distances and differences in temperature then fit the model by adjusting nugget, psill and range until the best fit is achieved. My model uses the following values below for each of these parameters.
+```{r Kriging, echo=TRUE, eval=TRUE, warning=FALSE}
+var.smpl <- variogram(f.0, climate_data, cloud = FALSE) 
+dat.fit  <- fit.variogram(var.smpl, fit.ranges = FALSE, fit.sills = FALSE,
+                          vgm(model="Sph", nugget = 5, psill = 10, 
+                              range = 7000)) 
+plot(var.smpl, dat.fit)
+
+# Save the variogram plot to a PNG file
+png("Variogram.png", width = 800, height = 600, res = 100)
+
+# Plot the variogram with fitted model
+plot(var.smpl, dat.fit, main = "Semivariogram of Temperature Data with Fitted Spherical Model")
+
+# Add a figure caption below the plot
+mtext("Figure 9: Semivariogram of temperature data for British Columbia.",
+      side = 1, line = 5, outer = FALSE, adj = 0)
+
+# Close the PNG device
+dev.off()
+```
+![Variogram](https://github.com/user-attachments/assets/f397677a-6584-4903-a079-606adcc0b484)
+
+Define the prediction grid. For this grid I am chosing to have n = 5000.
+```{r Kriging, echo=TRUE, eval=TRUE, warning=FALSE}
+# Define the grid
+xmin <- st_bbox(climate_data)$xmin
+xmax <- st_bbox(climate_data)$xmax
+ymin <- st_bbox(climate_data)$ymin
+ymax <- st_bbox(climate_data)$ymax
+
+# Create a regular grid
+n <- 50000  # Number of points
+grd <- st_as_sf(expand.grid(x = seq(xmin, xmax, length.out = sqrt(n)),
+                            y = seq(ymin, ymax, length.out = sqrt(n))),
+                coords = c("x", "y"), crs = st_crs(climate_data))
+```
+Now we will perform kriging using RStudio kriging function (krige) and convert the results to a raster format for spatial analysis.
+```{r Kriging, echo=TRUE, eval=TRUE, warning=FALSE}
+# Perform kriging
+dat.krg <- krige(f.0, climate_data, grd, dat.fit, debug.level=0)
+
+# Convert the kriging output to an sf object
+kriging_results_sf <- st_as_sf(dat.krg)
+
+# Create a Raster from Kriging Results
+# Convert to a data frame with coordinates for raster creation
+coords_df <- as.data.frame(st_coordinates(kriging_results_sf))
+coords_df$predicted_temp <- kriging_results_sf$var1.pred  # Replace with your prediction column
+
+# Create the raster from the resulting data frame
+predicted_raster <- rasterFromXYZ(coords_df)
+```
+We will now match the CRS projections and clip the newly created raster to the BC boundary.
+```{r Kriging, echo=TRUE, eval=TRUE, warning=FALSE}
+bc_boundary <- st_read("BC_bound.shp")
+bc_boundary <- st_set_crs(bc_boundary, 4326)
+
+crs(predicted_raster) <- crs(bc_boundary)
+
+# Clipping raster and bc boundary
+clipped_raster <-mask(predicted_raster,bc_boundary)
+```
+We can now create a map to visualize how temperature varies across BC.
+```{r Kriging, echo=TRUE, eval=TRUE, warning=FALSE}
+# Visualize the raster
+tmap_save(
+  tm_shape(clipped_raster) +
+    tm_raster(palette = viridis(10), title = "Predicted Temperature (clipped)") + 
+    tm_shape(bc_boundary) +
+    tm_borders(col = "black", lwd = 1) +
+    tm_layout(
+      title = "Clipped Kriging Results for Temperature",  
+      title.size = 1.2,
+      title.position = c("center", "top"),
+      legend.position = c("left", "bottom"),  
+      legend.width = 2.5  # Adjust the width of the legend to make labels larger
+    ) +
+    tm_compass(position = c("right", "top")) +
+    tm_scale_bar(position = c("left", "bottom")),
+  filename = "Raster.png",
+  width = 800,
+  height = 600,
+  dpi = 300
+)
+```
+![Raster](https://github.com/user-attachments/assets/5ad3a820-21d7-47ab-afec-ae6e156c5c94)
+
+### Combining Temperature and Wildfire Surfaces
+
+
 
 ## Results
-Provided our results from descriptive statistics we can 
+
 
 ## References
 
