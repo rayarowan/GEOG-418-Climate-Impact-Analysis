@@ -795,6 +795,7 @@ tmap_save(
 ![Raster](https://github.com/user-attachments/assets/5ad3a820-21d7-47ab-afec-ae6e156c5c94)
 
 ### Combining Temperature and Wildfire Surfaces
+Before we can perform further statistics to analyze the correlation between temperature and wildfire location in British Columbia during the summer of 2021, we must combine the temperature and fire data by adding the density values from the fire dataset to the polygons in the interpolated temperature surface.
 
 
 
