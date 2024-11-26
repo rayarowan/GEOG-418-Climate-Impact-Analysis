@@ -797,6 +797,70 @@ tmap_save(
 ### Combining Temperature and Wildfire Surfaces
 Before we can perform further statistics to analyze the correlation between temperature and wildfire location in British Columbia during the summer of 2021, we must combine the temperature and fire data by adding the density values from the fire dataset to the polygons in the interpolated temperature surface.
 
+To aquire these results we must first align the CRS of the IDW clipped and density results.
+```{r Combining data, echo=TRUE, eval=TRUE, warning=FALSE}
+# If they are different, transform one to match the other
+if (st_crs(idw_clipped) != st_crs(density_sf)) {
+  # Transform density_sf to match the CRS of idw_clipped
+  density_sf <- st_transform(density_sf, st_crs(idw_clipped))
+}
+```
+Then we will perform the spatial join.
+```{r Combining data, echo=TRUE, eval=TRUE, warning=FALSE}
+# Perform the spatial join
+joined_data <- st_join(idw_clipped, density_sf, join = st_intersects)
+```
+Select the relevant columns and rename for clarity.
+```{r Combining data, echo=TRUE, eval=TRUE, warning=FALSE}
+# Select needed columns
+final_data <- joined_data[, c("var1.pred", "fires")]
+
+# Rename column
+final_data <- final_data %>%
+  rename(temperature = var1.pred)
+```
+Next, replace NA values in the fires column with 0 so that areas with no data for fires represent zero fire events.
+```{r Combining data, echo=TRUE, eval=TRUE, warning=FALSE}
+# Replace NA values in the fires column with 0
+final_data <- final_data %>%
+  mutate(fires = ifelse(is.na(fires), 0, fires))
+```
+Now we can plot the data for visualization and save the final combined data as a shapefile for future Ordinary Least Squares and Global Weighted Regression models. 
+```{r Combining data, echo=TRUE, eval=TRUE, warning=FALSE}
+# Create the map
+# Create the map
+temp_map <- ggplot(data = final_data) +
+  geom_sf(aes(fill = temperature)) +  # Use the correct column name, e.g., 'var1.pred' or 'temperature'
+  scale_fill_viridis_c(option = "C") +
+  theme_minimal() +
+  labs(
+    title = "Predicted Temperature Map",
+    fill = "Temperature (°C)",
+    caption = "Figure 11: Predicted Temperature Map Across British Columbia. Colors represent temperature variations (°C)."
+  ) +
+  theme(
+    legend.position = "right",
+    plot.caption = element_text(hjust = 0)  # Left-aligned caption without italic
+  )
+
+# Save final_data as a shapefile
+st_write(final_data, "final_data.shp", delete_dsn = TRUE)
+
+# Convert final_data to a data frame
+final_data_df <- st_drop_geometry(final_data)
+
+# Write as CSV
+write.csv(final_data_df, "final_data.csv", row.names = FALSE)
+
+# Save the map as a PNG
+ggsave("Temperature_Combo_Map.png", plot = temp_map, width = 10, height = 8, dpi = 300)
+```
+![Temperature_Combo_Map](https://github.com/user-attachments/assets/24fb9640-ef15-4d92-9aff-425a37881f68)
+
+### Determining if Temperature Explains Wildfire Spatial Variability
+In this part of the tutorials method section Ordinary Least Squares (OLS), Global Moran's I (using result from OLS) and Global Weighted Regression models will be conducted. These statistical tests will determine if, at a global scale across BC, the temperature variable is able to explain the variability in the density of fires during the 2021 summer months.
+
+#### Ordinary Least Squares
 
 
 ## Results
