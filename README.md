@@ -456,11 +456,11 @@ ggplot() +
 To answer this question, this tutorial will explain how to perform three different statistical tests; nearest neighbour analysis, quadrat analysis and k-function. These will determine if the wildfire size data are showing random, dispersed or clustered spatial patterns. To summarize point pattern analysis we will also perform a kernel density estimation based on the statistical test results. 
 
 #### Nearest Neighbour Analysis
-Nearest neighbour analysis is a technique used to determine if points nearby one another display a random, dispersed or clustered pattern (Corvec et al., 2013). It does this by comparing the mean distance between nearest neighbors (Corvec et al., 2013). This distance helps determine how similar or dissimilar two data points are. To determine if our pattern is clustered or disperced we then compared the distance to the average nearest neighbour distance generated using a random pattern for an area with the same spatial density of points.
+Nearest Neighbour Analysis is a method used to assess whether points in a spatial distribution exhibit a random, dispersed, or clustered pattern (Corvec et al., 2013). This technique works by calculating and comparing the average distance between each point and its nearest neighbor (Corvec et al., 2013). In this tutorial, this distance is utilized to evaluate the similarity or dissimilarity between data points. To determine whether our fire pattern is clustered or dispersed, we compared the observed distances to the average nearest neighbour distance expected from a random pattern with the same spatial density.
 
-To conduct a nearest neighbour analysis for wildfire size (ha) across BC in the 2021 summer, we want to aquire the  average nearest neighbour value for a spatially random distribution ($$\bar{NND_R} = \frac{1}{2\sqrt{Density}}$$), the average nearest neighbour value for a perfectly dispersed pattern ($$\bar{NND_D} = \frac{1.07453}{\sqrt{Density}}$$), and a z-score ($$Z_n = \frac{\bar{NND} - \bar{NND_R}}{\sigma\bar{NND}}$$). 
+To conduct a nearest neighbour analysis for wildfire size (ha) across BC in the 2021 summer, we want to aquire the  average nearest neighbour value for a spatially random distribution ($$\bar{NND_R} = \frac{1}{2\sqrt{Density}}$$), the average nearest neighbour value for a perfectly dispersed pattern ($$\bar{NND_D} = \frac{1.07453}{\sqrt{Density}}$$), and a z-score ($$Z_n = \frac{\bar{NND} - \bar{NND_R}}{\sigma\bar{NND}}$$). The density is calculated by dividing the number of points by the area of BC. 
 
-To obtain these results the following code can be used.
+To calculate these results the following code can be used.
 ```{r Nearest Neighbour, echo=TRUE, eval=TRUE, warning=FALSE}
 # Conduct Nearest Neighbour Analysis.
 nearestNeighbour <- nndist(df$SIZE_HA)
@@ -699,7 +699,7 @@ ggsave("Clipped_IDW_Interpolation_Map.png", width = 10, height = 8, dpi = 300)
 #### Ordinary Kriging
 Ordinary kriging is an interpolation method in which the predictor is an optimal linear predictor, and the result is a exact interpolation (Dumas et al., 2013). This simply means that each point being predicted using kriging will be the best linear unbiased estimate and that predictions at sampled points are the same as observed values with minimal variance (Dumas et al., 2013). Kriging involves the use of a semivariogram to assign weights to known data points to make predictions at unsampled locations (O’sullivan & Unwin, 2010). The main assumption of kriging is a contant mean across the domain (O’sullivan & Unwin, 2010). In this tutorial it means that the average temperature is constant across the entire domain of BC. 
 
-To perform kriging we will be working with our climate shapefile that was created earlier in this tutorial. Load in this file and use the function f.0 to define a formula for the kriging model with temperature as our variable of interest. 
+The purpose of perfoming kriging in this tutorial is to interpolate an accurate spatial representation of temperature across BC and account for areas where there are no temperature measurments. To perform kriging we will be working with our climate shapefile that was created earlier in this tutorial. Load in this file and use the function f.0 to define a formula for the kriging model with temperature as our variable of interest. 
 ```{r Kriging, echo=TRUE, eval=TRUE, warning=FALSE}
 # Read the shapefile
 climate_data <- st_read("ClimateData.shp")
@@ -828,7 +828,6 @@ final_data <- final_data %>%
 Now we can plot the data for visualization and save the final combined data as a shapefile for future Ordinary Least Squares and Global Weighted Regression models. 
 ```{r Combining data, echo=TRUE, eval=TRUE, warning=FALSE}
 # Create the map
-# Create the map
 temp_map <- ggplot(data = final_data) +
   geom_sf(aes(fill = temperature)) +  # Use the correct column name, e.g., 'var1.pred' or 'temperature'
   scale_fill_viridis_c(option = "C") +
@@ -861,7 +860,38 @@ ggsave("Temperature_Combo_Map.png", plot = temp_map, width = 10, height = 8, dpi
 In this part of the tutorials method section Ordinary Least Squares (OLS), Global Moran's I (using result from OLS) and Global Weighted Regression models will be conducted. These statistical tests will determine if, at a global scale across BC, the temperature variable is able to explain the variability in the density of fires during the 2021 summer months.
 
 #### Ordinary Least Squares
+Ordinary least squares (OLS) determines if temperature explains fire spatial variability by modeling the relationship between the independent variable, temperature and dependent variable, wildfire occurrence across BC. It does this by minimizing the squared differences between observed wildfire variability and predictions based on temperature by fitting a linear model to the data (Majka, 2024). Using the proportion of variance in the dependent variable accounted for by the independent variable, the model can determine how much of the variation in wildfire spatial variability is explained by temperature (Majka, 2024). The slope of the model determines if there is a positive, negative or negligable relationship between the variables. If the slope is positive it means that  temperature strongly influences the spatial distribution of wildfires (Majka, 2024). If the slope is negative wildfire locations will not be determined by temperature (Majka, 2024).
 
+To determine this relationship the following coding can be conducted.
+
+First we will read in the final data shapefile created during the combination of temperature and fire data.
+```{r OLS, echo=TRUE, eval=TRUE, warning=FALSE}
+final_data_sf <- st_read("final_data.shp")
+```
+We then fit a linear regression model to examine the relationship between temperature and fire location, remove rows with NA values in the fires column and add residuals to the original spatial data frame.
+```{r OLS, echo=TRUE, eval=TRUE, warning=FALSE}
+ols_model <- lm(fires ~ temprtr, data = final_data_sf)
+
+# Handling missing data
+final_data_sf <- final_data_sf[complete.cases(final_data_sf$fires), ]
+
+# Add residuals to the original spatial data frame
+final_data_sf$residuals <- resid(ols_model)
+```
+Now we will create a map of residuals from the OLS regression.
+```{r OLS, echo=TRUE, eval=TRUE, warning=FALSE}
+ggplot(data = final_data_sf) +
+  geom_sf(aes(fill = residuals)) + # Map the residuals to fill color
+  scale_fill_viridis_c(option = "C", name = "Residuals") + # Use a color scale
+  theme_minimal() +
+  labs(title = "Map of Residuals from OLS Regression",
+       fill = "Residuals") +
+  theme(legend.position = "right")
+
+# Save the plot if desired
+ggsave("residuals_map.png", width = 10, height = 8, dpi = 300)
+```
+![residuals_map](https://github.com/user-attachments/assets/7458aaf2-bea9-43f3-be6d-d1584e1caef0)
 
 ## Results
 
