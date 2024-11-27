@@ -893,10 +893,82 @@ ggsave("residuals_map.png", width = 10, height = 8, dpi = 300)
 ```
 ![residuals_map](https://github.com/user-attachments/assets/7458aaf2-bea9-43f3-be6d-d1584e1caef0)
 
+#### Global Moran's I
+The next step in this tutorial is to calculate the Global Moran’s I statistic. This is a measure of overall spatial autocorrelation across a given area (Getis and Ord, 1992). It assesses the degree of similarity between neighbouring spatial units based on a given variable (Getis and Ord, 1992). In this tutorial the Global Moran’s I will be determining if the residuals (differences between the observed and predicted values of fires) from the OLS regression across BC are spatially autocorrelated. It is a global scale measurement because we are considering the entirety of BC in assessing spatial autocorrelation. A positive Moran’s I value tells us that there is positive spatial autocorrelation which translates into a clustered distribution (Getis and Ord,1992). A negative Moran’s I value indicates negative spatial autocorrelation and a dispersed distribution, and a Moran’s I value of exactly 0 means the data is randomly distributed (Getis and Ord, 1992).
+ 
+Now that we have determined how to choose and weight our neighbours, we can mathematically calculate the Global Moran’s I statistic using the following equation:
+
+$$I = \frac{\sum_{i=1}^n\sum_{j=1}^nW_{i,j}(x_i - \bar{x})(x_j - \bar{x})}{(\sum_{i=1}^n\sum_{j=1}^nW_{i,j})\sum_{i=1}^n(x_i - \bar{x})^2}$$
+
+Where x is the variable being determined and (i) is our point of interest, xi is the value of the variable at (i). xj is a neighbout to xi. (xi - x) displays how similar the point is to the mean and (xj - x) displays how similar the neighbour is to the mean. Wi,j is the spatial weighting matrix (described above in this tutorial) both the differences are multiplied by. To find the Global Moran’s I we sum the differences between the points and neighbours across the study area to measure covariance in the numberator. The denominator is used to standardize our values.
+
+The following code is how Moran's I can be determined for the OLS regression residuals using the Queen's weighting scheme.
+```{r Moran's I, echo=TRUE, eval=TRUE, warning=FALSE}
+## Neighborhood Matrix - Queen's Weights
+
+# Using residuals from OLS regression to see if they are spatially autocorrelated
+# Remove NA
+residual_noNA <- final_data_sf[!is.na(final_data_sf$residuals), ]
+# Neighbours - Queens weight
+residual.nb <- poly2nb(residual_noNA)
+# Use st_geometry to get the coordinates of polygons
+residual.net <- nb2lines(residual.nb, coords=st_geometry(st_centroid(residual_noNA)))
+st_crs(residual.net) <- st_crs(residual_noNA)                
+
+# Make queens map
+tm_shape(residual_noNA) +
+  tm_borders(col = 'lightgrey') +
+  tm_shape(final_data.net) +
+  tm_lines(col = 'blue', lwd = 1) +
+  tm_layout(title = "Queens")
+
+# Create residual weights matrix
+residual.lw <- nb2listw(residual.nb, zero.policy = TRUE, style = "W")
+
+## Global Morans I
+residual_mi <- moran.test(residual_noNA$`residuals`, residual.lw, zero.policy = TRUE)
+
+# Extract Global Moran's I results for residuals
+mI_residual <- residual_mi$estimate[[1]]
+eI_residual <- residual_mi$estimate[[2]]
+var_residual <- residual_mi$estimate[[3]]
+
+# Calculate z-test for residuals
+zresidual <- (mI_residual - eI_residual) / (sqrt(var_residual))
+
+# Calculate the p-value
+pvalue_residual <- residual_mi$p.value
+
+# Create a data frame
+residual_data <- data.frame(
+  Metric = c("Moran's I", "Expected Value", "Variance", "Z-Score", "P-Value"),
+  Value = c(
+    round(mI_residual, 5),
+    round(eI_residual, 5),
+    round(var_residual, 5),
+    round(zresidual, 5),
+    round(pvalue_residual, 5)
+  )
+)
+
+# Start a PNG device
+png("moran_scatter_plot_fixed.png", width = 800, height = 600, res = 300)
+
+# Generate the Moran's I scatter plot
+moran.plot(residual_noNA$residuals, residual.lw, zero.policy = TRUE, 
+           xlab = "Observed Residuals", 
+           ylab = "Spatially Lagged Residuals", 
+           quiet = NULL)
+
+# Close the graphics device
+dev.off()
+```
+
 ## Results
 
 
 ## References
+Getis, A., & Ord, J. K. (1992). The Analysis of Spatial Association by Use of Distance Statistics. Geo- graphical Analysis, 24(3), 189–206. https://doi.org/10.1111/j.1538-4632.1992.tb00261.x
 
 Woke, G. (2023, March 24). The difference between libraries and frameworks. Simple Talk. https://www.red-gate.com/simple-talk/development/other-development/the-difference-between-libraries-and-frameworks/
 
