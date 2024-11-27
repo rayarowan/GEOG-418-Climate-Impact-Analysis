@@ -902,43 +902,60 @@ $$I = \frac{\sum_{i=1}^n\sum_{j=1}^nW_{i,j}(x_i - \bar{x})(x_j - \bar{x})}{(\sum
 
 Where x is the variable being determined and (i) is our point of interest, xi is the value of the variable at (i). xj is a neighbout to xi. (xi - x) displays how similar the point is to the mean and (xj - x) displays how similar the neighbour is to the mean. Wi,j is the spatial weighting matrix (described above in this tutorial) both the differences are multiplied by. To find the Global Moran’s I we sum the differences between the points and neighbours across the study area to measure covariance in the numberator. The denominator is used to standardize our values.
 
-The following code is how Moran's I can be determined for the OLS regression residuals using the Queen's weighting scheme.
-```{r Moran's I, echo=TRUE, eval=TRUE, warning=FALSE}
-## Neighborhood Matrix - Queen's Weights
+The following code is how Moran's I can be determined for the OLS regression residuals using the Queen's weighting scheme. 
 
+The first step is to prepare the residual data by removing any NA values.
+```{r Moran's I, echo=TRUE, eval=TRUE, warning=FALSE}
 # Using residuals from OLS regression to see if they are spatially autocorrelated
 # Remove NA
 residual_noNA <- final_data_sf[!is.na(final_data_sf$residuals), ]
-# Neighbours - Queens weight
+```
+Next we will define the queen's weight neighbours.
+```{r Moran's I, echo=TRUE, eval=TRUE, warning=FALSE}
+# Neighborhood Matrix - Queen's Weights
 residual.nb <- poly2nb(residual_noNA)
-# Use st_geometry to get the coordinates of polygons
+```
+Following this and using the nb2lines command, spatial network lines are created and ensure the same coordinate reference system is being used for residual.net as residual_noNA.
+```{r Moran's I, echo=TRUE, eval=TRUE, warning=FALSE}
 residual.net <- nb2lines(residual.nb, coords=st_geometry(st_centroid(residual_noNA)))
-st_crs(residual.net) <- st_crs(residual_noNA)                
-
-# Make queens map
-tm_shape(residual_noNA) +
+st_crs(residual.net) <- st_crs(residual_noNA)
+```           
+Generate the queen's weight map. 
+```{r Moran's I, echo=TRUE, eval=TRUE, warning=FALSE}
+# Make queen's map
+queens_map <- tm_shape(residual_noNA) +
   tm_borders(col = 'lightgrey') +
-  tm_shape(final_data.net) +
+  tm_shape(residual.net) +
   tm_lines(col = 'blue', lwd = 1) +
-  tm_layout(title = "Queens")
+  tm_layout(title = "Queens") +
+  tm_credits("Figure 13: Queen's weight scheme across BC to display residual data points", position = c("LEFT", "BOTTOM"))
 
+# Save the map to a PNG file
+tmap_save(queens_map, filename = "queens_map.png", width = 800, height = 600, dpi = 300)
+```
+![queens_map](https://github.com/user-attachments/assets/b85837c9-5b1f-45b2-86f9-f5f93802cbfe)
+
+Now create a queen's weight matrix using the nb2listw command which converts the structure of the queen’s neighborhood object into a spatial weights matrix.
+```{r Moran's I, echo=TRUE, eval=TRUE, warning=FALSE}
 # Create residual weights matrix
 residual.lw <- nb2listw(residual.nb, zero.policy = TRUE, style = "W")
-
-## Global Morans I
+```
+We are now ready to calculate the Global Moran's I and extract the moran's I results.
+```{r Moran's I, echo=TRUE, eval=TRUE, warning=FALSE}
+# Calculating Global Morans I
 residual_mi <- moran.test(residual_noNA$`residuals`, residual.lw, zero.policy = TRUE)
 
 # Extract Global Moran's I results for residuals
 mI_residual <- residual_mi$estimate[[1]]
 eI_residual <- residual_mi$estimate[[2]]
 var_residual <- residual_mi$estimate[[3]]
-
 # Calculate z-test for residuals
 zresidual <- (mI_residual - eI_residual) / (sqrt(var_residual))
-
 # Calculate the p-value
 pvalue_residual <- residual_mi$p.value
-
+```
+Create a summary table of the results.
+```{r Moran's I, echo=TRUE, eval=TRUE, warning=FALSE}
 # Create a data frame
 residual_data <- data.frame(
   Metric = c("Moran's I", "Expected Value", "Variance", "Z-Score", "P-Value"),
@@ -950,19 +967,27 @@ residual_data <- data.frame(
     round(pvalue_residual, 5)
   )
 )
-
+```
+Now make a Global Moran's I scatter plot to view the spatial autocorrelation.
+```{r Moran's I, echo=TRUE, eval=TRUE, warning=FALSE}
 # Start a PNG device
-png("moran_scatter_plot_fixed.png", width = 800, height = 600, res = 300)
+png("moran_scatter_plot_fixed.png", width = 1800, height = 1500, res = 300)
 
-# Generate the Moran's I scatter plot
+# Generate Moran's I scatter plot
 moran.plot(residual_noNA$residuals, residual.lw, zero.policy = TRUE, 
            xlab = "Observed Residuals", 
-           ylab = "Spatially Lagged Residuals", 
-           quiet = NULL)
+           ylab = "Spatially Lagged Residuals")
+
+# Add a title to the plot
+title(main = "Moran's I Scatter Plot", cex.main = 1.5, font.main = 2)
+
+# Add a caption
+mtext("Figure 14: Moran's I Scatter Plot of Residuals", side = 1, line = 4, cex = 0.8, font = 2)
 
 # Close the graphics device
 dev.off()
 ```
+
 
 ## Results
 
