@@ -449,7 +449,6 @@ ggplot() +
        +
          ggsave("density_of_fires_map.png", width = 10, height = 7, dpi = 300))
 ```
-![density_of_fires_map](https://github.com/user-attachments/assets/1edcc0cf-a9af-48b1-a0d7-a86b6a0b50ed)
 
 #### Point Pattern Analysis
 ##### Is the Relative Size and Frequency of Wildfires Location Dependant Across BC in Summer 2021?
@@ -510,7 +509,6 @@ png("Output_Table3.png", width = 1000, height = 600, res = 150)  # Adjust size a
 grid.draw(nnd_table)
 dev.off()
 ```
-![Output_Table3](https://github.com/user-attachments/assets/f4d82e8c-59f1-436a-a6d8-c1e3f77259f9)
 
 #### Quadrat Analysis
 Quadrat analysis can be defined as a mathematical and statistical technique to measure properties of point patterns (Thomas, 1977). This method divides our BC study area into quadrats and analyzes the density of wildfire points in each quadrat (Thomas, 1977). It does this to test if our spatial patterns are significantly different from random.
@@ -582,7 +580,6 @@ png("Output_Table4.png", width = 1000, height = 600, res = 150)  # Adjust size a
 grid.draw(quad_table)
 dev.off()
 ```
-![Output_Table4](https://github.com/user-attachments/assets/de68401a-3a92-4492-aaee-57ac481ad108)
 
 #### K-Function
 The K function is a unique spatial statistic that can be used to assess the dependence between locations at varying distances (Moraga, 2024). The formula for the K-function is as follows:
@@ -595,7 +592,7 @@ To calculate complete spatial randomness the following equation is used:
 
 $$K_{CSR}(d) = \pi d^2$$
 
-Code used to obtain the K-function for wildfire points is below. The black line represents the K-function, $$K_{d}$$ and the red line the random distribution of the same data, $$K_{CSR}(d)$$.
+Code used to obtain the K-function for wildfire points is below. 
 ```{r K Function, echo=TRUE, eval=TRUE, warning=FALSE}
 #Create a basic k-function
 k.fun <- Kest(fire.ppp, correction = "Ripley")
@@ -604,7 +601,6 @@ k.fun <- Kest(fire.ppp, correction = "Ripley")
 k.fun.e <- envelope(fire.ppp, Kest, nsim = 99, correction = "Ripley", verbose = FALSE)
 plot(k.fun.e, main = "Basic K-Function of Fires")
 ```
-![Basic K-function](https://github.com/user-attachments/assets/bb82b9c6-958d-4a8f-8067-4cf8e802b151)
 
 #### Where are the Fire Hotspots Located?
 #### Kernel Density Estimation
@@ -620,7 +616,6 @@ The code to obtain the kernel density estimation is below.
 kde.fire <- density.ppp(fire.ppp, sigma = bw.diggle(fire.ppp))
 plot(kde.fire, main = "Kernel Density Estimation of Fires")
 ```
-![Kernal Density](https://github.com/user-attachments/assets/db3954a7-88c1-4a2c-9f7b-693e9f70a9a5)
 
 ### Creating Temperature Surface
 To create the temperature surface across BC using data from May 1st to September 1st, 2021, inverse distance weighting (IDW) and kriging will be used to create an interpolated surface of the temperature variable.
@@ -792,7 +787,6 @@ tmap_save(
   dpi = 300
 )
 ```
-![Raster](https://github.com/user-attachments/assets/5ad3a820-21d7-47ab-afec-ae6e156c5c94)
 
 ### Combining Temperature and Wildfire Surfaces
 Before we can perform further statistics to analyze the correlation between temperature and wildfire location in British Columbia during the summer of 2021, we must combine the temperature and fire data by adding the density values from the fire dataset to the polygons in the interpolated temperature surface.
@@ -1088,6 +1082,40 @@ ggsave("gwr_coefficients_fixed_bandwidth.png", width = 10, height = 8, dpi = 300
 ![gwr_coefficients_fixed_bandwidth](https://github.com/user-attachments/assets/95c89cc8-c33a-4a07-84e7-4165076bd253)
 
 ## Results
+
+![density_of_fires_map](https://github.com/user-attachments/assets/1edcc0cf-a9af-48b1-a0d7-a86b6a0b50ed)
+
+Based on the density map we can see that the locaton of fires during summer 2021 were most compact in south-central BC, indicated by the yellow point on the map. This is followed by the orange points, which plot in a similar region.
+
+#### Is the Relative Size and Frequency of Wildfires Location Dependant Across BC in Summer 2021?
+
+This section of the report will outline the results of the the three statistical tests (nearest neighbour analysis, quadrat analysis and k-function). 
+
+![Output_Table3](https://github.com/user-attachments/assets/f4d82e8c-59f1-436a-a6d8-c1e3f77259f9)
+
+Beginning with the nearest neighbour analysis, we can see in table 3 that on average fires are approximately 27.3 km apart, however if they were to be randomly distributed we would expect them to be 12.7 km apart. The outputted NND test value show a clustered pattern when compared to the values for NNDd and NNDr. This is because the NND value of 57.2 is smaller than that for NNDr. According to the nearest neighbour method, the z-value of -73.07 confirms that there is strong evidence for fires of similar size (ha) in BC during the summer of 2021 being extremely clustered.
+
+![Output_Table4](https://github.com/user-attachments/assets/de68401a-3a92-4492-aaee-57ac481ad108)
+
+When the study area (BC) was divided into 144 quadrates, the results obtained from quadrat analysis in table 4 indicate that there was a high variance of fires across the quadrats. The VMR being greater than 1 (38.33) suggests strong clustering and the chi-square value of 5481.28 confirms that this clustering is statistically significant.
+
+![Basic K-function](https://github.com/user-attachments/assets/bb82b9c6-958d-4a8f-8067-4cf8e802b151)
+
+The K-function further suggests spatial clustering of fires in the summer of 2021 across BC. In figure 6 we can see that the observed K-function ($$K(d)$$) represented by the black line plots above the theoretical K-function ($$K_{CSR}(d)$$) represented by the red dotted line. This indicates that fire locations are more clustered than would be expected under random distribution.
+
+#### Where are the Fire Hotspots Located?
+![Kernal Density](https://github.com/user-attachments/assets/db3954a7-88c1-4a2c-9f7b-693e9f70a9a5)
+
+This kernel density estimation in figure 7 confirms the clustering patterns indictaed by the K-function. The yellow/red areas display the hotspots in BC where fires were concentrated/clustered. These results align well with the denisty map.
+
+![Clipped_IDW_Interpolation_Map](https://github.com/user-attachments/assets/01a078fc-cd47-47a8-9479-8294bf175eed)
+
+The clipped IDW results displayed by figure 8 show that the highest temperatures (temperatures above 16°C) occur around the south-central region of BC. 
+
+![Raster](https://github.com/user-attachments/assets/5ad3a820-21d7-47ab-afec-ae6e156c5c94)
+
+
+
 
 
 ## References
