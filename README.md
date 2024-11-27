@@ -689,7 +689,6 @@ ggplot(data = idw_clipped) +
 # Save the map as an image file (optional)
 ggsave("Clipped_IDW_Interpolation_Map.png", width = 10, height = 8, dpi = 300)
 ```
-![Clipped_IDW_Interpolation_Map](https://github.com/user-attachments/assets/01a078fc-cd47-47a8-9479-8294bf175eed)
 
 #### Ordinary Kriging
 Ordinary kriging is an interpolation method in which the predictor is an optimal linear predictor, and the result is a exact interpolation (Dumas et al., 2013). This simply means that each point being predicted using kriging will be the best linear unbiased estimate and that predictions at sampled points are the same as observed values with minimal variance (Dumas et al., 2013). Kriging involves the use of a semivariogram to assign weights to known data points to make predictions at unsampled locations (O’sullivan & Unwin, 2010). The main assumption of kriging is a contant mean across the domain (O’sullivan & Unwin, 2010). In this tutorial it means that the average temperature is constant across the entire domain of BC. 
