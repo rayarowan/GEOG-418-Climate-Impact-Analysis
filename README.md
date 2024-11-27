@@ -860,9 +860,9 @@ ggsave("Temperature_Combo_Map.png", plot = temp_map, width = 10, height = 8, dpi
 In this part of the tutorials method section Ordinary Least Squares (OLS), Global Moran's I (using result from OLS) and Global Weighted Regression models will be conducted. These statistical tests will determine if, at a global scale across BC, the temperature variable is able to explain the variability in the density of fires during the 2021 summer months.
 
 #### Ordinary Least Squares
-Ordinary least squares (OLS) determines if temperature explains fire spatial variability by modeling the relationship between the independent variable, temperature and dependent variable, wildfire occurrence across BC. It does this by minimizing the squared differences between observed wildfire variability and predictions based on temperature by fitting a linear model to the data (Majka, 2024). Using the proportion of variance in the dependent variable accounted for by the independent variable, the model can determine how much of the variation in wildfire spatial variability is explained by temperature (Majka, 2024). The slope of the model determines if there is a positive, negative or negligable relationship between the variables. If the slope is positive it means that  temperature strongly influences the spatial distribution of wildfires (Majka, 2024). If the slope is negative wildfire locations will not be determined by temperature (Majka, 2024).
+Ordinary Least Squares (OLS) regression determines whether temperature explains wildfire spatial variability by modeling the relationship between the independent variable (temperature) and the dependent variable (fire) across BC. It does so by minimizing the squared differences between observed fire occurrence and the values predicted based on temperature, fitting a linear model to the data (Majka, 2024). The model evaluates how much of the variation in wildfire occurrence is explained by temperature using the proportion of variance accounted for by the independent variable. The higher the R squared value the more influence temperature has on fire spatial variability (Majka, 2024). The slope of the model determines if there is a positive, negative or negligable relationship between the variables. If the slope is positive it means that  temperature strongly influences the spatial distribution of wildfires (Majka, 2024). A negative slope indicates an inverse relationship, where an increase in temperature would result in less fire occurrence (Majka, 2024). A slope of approxinatley zero suggests no relationship between the variables (Majka, 2024).
 
-To determine this relationship the following coding can be conducted.
+This tutorial will now demonstrate how to calculate the residuals using OLS regression and then plot them on a map for visualization.
 
 First we will read in the final data shapefile created during the combination of temperature and fire data.
 ```{r OLS, echo=TRUE, eval=TRUE, warning=FALSE}
@@ -894,13 +894,13 @@ ggsave("residuals_map.png", width = 10, height = 8, dpi = 300)
 ![residuals_map](https://github.com/user-attachments/assets/7458aaf2-bea9-43f3-be6d-d1584e1caef0)
 
 #### Global Moran's I
-The next step in this tutorial is to calculate the Global Moran’s I statistic. This is a measure of overall spatial autocorrelation across a given area (Getis and Ord, 1992). It assesses the degree of similarity between neighbouring spatial units based on a given variable (Getis and Ord, 1992). In this tutorial the Global Moran’s I will be determining if the residuals (differences between the observed and predicted values of fires) from the OLS regression across BC are spatially autocorrelated. It is a global scale measurement because we are considering the entirety of BC in assessing spatial autocorrelation. A positive Moran’s I value tells us that there is positive spatial autocorrelation which translates into a clustered distribution (Getis and Ord,1992). A negative Moran’s I value indicates negative spatial autocorrelation and a dispersed distribution, and a Moran’s I value of exactly 0 means the data is randomly distributed (Getis and Ord, 1992).
+The next step in this tutorial is to calculate the Global Moran’s I statistic using the residuals obtained from OLS. This is a measure of overall spatial autocorrelation across a given area (Getis and Ord, 1992). It assesses the degree of similarity between neighbouring spatial units based on a given variable (Getis and Ord, 1992). In this tutorial the Global Moran’s I will be determining if the residuals (differences between the observed and predicted values of fires) from the OLS regression across BC are spatially autocorrelated. It is a global scale measurement because we are considering the entirety of BC in assessing spatial autocorrelation. To determine Moran's I we must first choose a spatial weighting matrix. In this tutorial we will be using Queen's weight. A positive Moran’s I value tells us that there is positive spatial autocorrelation which translates into a clustered distribution (Getis and Ord,1992). A negative Moran’s I value indicates negative spatial autocorrelation and a dispersed distribution, and a Moran’s I value of exactly 0 means the data is randomly distributed (Getis and Ord, 1992).
  
-Now that we have determined how to choose and weight our neighbours, we can mathematically calculate the Global Moran’s I statistic using the following equation:
+We can mathematically calculate the Global Moran’s I statistic using the following equation:
 
 $$I = \frac{\sum_{i=1}^n\sum_{j=1}^nW_{i,j}(x_i - \bar{x})(x_j - \bar{x})}{(\sum_{i=1}^n\sum_{j=1}^nW_{i,j})\sum_{i=1}^n(x_i - \bar{x})^2}$$
 
-Where x is the variable being determined and (i) is our point of interest, xi is the value of the variable at (i). xj is a neighbout to xi. (xi - x) displays how similar the point is to the mean and (xj - x) displays how similar the neighbour is to the mean. Wi,j is the spatial weighting matrix (described above in this tutorial) both the differences are multiplied by. To find the Global Moran’s I we sum the differences between the points and neighbours across the study area to measure covariance in the numberator. The denominator is used to standardize our values.
+Where x is the variable being determined and (i) is our point of interest, xi is the value of the variable at (i). xj is a neighbout to xi. (xi - x) displays how similar the point is to the mean and (xj - x) displays how similar the neighbour is to the mean. Wi,j is the spatial weighting matrix (  both the differences are multiplied by. To find the Global Moran’s I we sum the differences between the points and neighbours across the study area to measure covariance in the numberator. The denominator is used to standardize our values.
 
 The following code is how Moran's I can be determined for the OLS regression residuals using the Queen's weighting scheme. 
 
@@ -987,13 +987,113 @@ mtext("Figure 14: Moran's I Scatter Plot of Residuals", side = 1, line = 4, cex 
 # Close the graphics device
 dev.off()
 ```
+![moran_scatter_plot_fixed](https://github.com/user-attachments/assets/41b2d9e9-43e6-4027-9d9f-e71d2f9daa53)
 
+#### Geographically Weighted Regression
+Since the Global Moran's I indicated positive spatial autocorrelation, the main OLS assumption stating that residuals are independent is violated and a geographically weighted regression (GWR) must be conducted. This analysis is more complex than the OLS regression as it allows for the regression coefficients to vary spatially, meaning the relationship between variables can change depending on the location (Páez & Wheeler, 2009). It does this by fitting regression models at each location instead of using a single global regression model and therefore is not as influenced by spatial autocorrelation (Páez & Wheeler, 2009). 
+
+Using GWR we will be able to identify where across BC temperature has significant influence on fire occurance compared to where it has negligable effects.
+
+The following steps are done to prepare the data for GWR.
+```{r GWR, echo=TRUE, eval=TRUE, warning=FALSE}
+# Read the shapefile (with residuals included)
+final_data_sf <- st_read("final_data.shp")
+
+# Preview the data to check variable names and content
+print(head(final_data_sf))
+print(colnames(final_data_sf))
+
+# Convert the sf object to Spatial object
+final_data_sp <- as_Spatial(final_data_sf)
+
+# Create neighborhood structure
+neighbors <- poly2nb(final_data_sp, queen = TRUE)
+
+# Check neighbors for any issues
+print(summary(neighbors))
+
+# Check for any empty neighbors
+if (any(sapply(neighbors, length) == 0)) {
+  warning("Some polygons have no neighbors. This may cause issues for GWR.")
+}
+
+final_data_sp@data[["fires"]][is.na(final_data_sp@data[["fires"]])] <- mean(final_data_sp@data[["fires"]], na.rm = TRUE)
+
+# Prepare the dependent and independent variables
+dependent_var <- final_data_sp@data$fires
+independent_vars <- final_data_sp@data$temprtr
+
+# Check if both variables are numeric
+if (!is.numeric(dependent_var) || !is.numeric(independent_vars)) {
+  stop("Dependent and independent variables must be numeric.")
+}
+```
+Now we can run our GWR model.
+```{r GWR, echo=TRUE, eval=TRUE, warning=FALSE}
+# Run GWR with a fixed bandwidth of 200 km
+fixed_bandwidth <- 200000  # Bandwidth in meters (200 km)
+
+gwr_model_fixed <- gwr(dependent_var ~ independent_vars, 
+                       data = final_data_sp, 
+                       bandwidth = fixed_bandwidth, 
+                       se.fit = TRUE)
+
+# Validate that the model ran successfully
+if (is.null(gwr_model_fixed)) {
+  stop("The GWR model did not return any results.")
+}
+
+if (is.null(gwr_model_fixed$SDF)) {
+  stop("The GWR model SDF is NULL, indicating it might not have calculated properly.")
+}
+
+# Print GWR summary
+print(summary(gwr_model_fixed))
+```
+Extract the GWR results and centroids of the spatial features.
+```{r GWR, echo=TRUE, eval=TRUE, warning=FALSE}
+# Extract coefficients and create a dataframe for visualization
+gwr_results_fixed <- as.data.frame(gwr_model_fixed$SDF)
+
+# Extract coordinates from the original spatial data
+coordinates_fixed <- st_coordinates(final_data_sf)  # Get coordinates from the original data
+
+# Get centroids of each feature in final_data_sf
+coordinates_fixed <- st_coordinates(st_centroid(final_data_sf))
+```
+Now combine the centroids with the GWR results to enable mapping then convert the combined data back into an sf object for compatibility with ggplot2.
+```{r GWR, echo=TRUE, eval=TRUE, warning=FALSE}
+# Combine the GWR results with the coordinates
+gwr_results_fixed <- cbind(gwr_results_fixed, coordinates_fixed)
+
+# Convert to an sf object for visualization
+gwr_output_sf_fixed <- st_as_sf(gwr_results_fixed, coords = c("X", "Y"), crs = st_crs(final_data_sf))
+```
+For visualization of the GWR coefficients create a plot. 
+```{r GWR, echo=TRUE, eval=TRUE, warning=FALSE}
+# Plotting GWR coefficients with the fixed bandwidth
+ggplot(data = gwr_output_sf_fixed) +
+  geom_sf(aes(color = gwr.e)) +
+  scale_color_viridis_c(option = "C") +
+  labs(
+    title = "GWR Coefficients with Fixed Bandwidth of 200 km",
+    fill = "GWR Estimate",
+    caption = "Figure 15: Visualizing local regression coefficients from GWR analysis."
+  ) +
+  theme_minimal()
+
+# Optional: Save the plot
+ggsave("gwr_coefficients_fixed_bandwidth.png", width = 10, height = 8, dpi = 300)
+```
+![gwr_coefficients_fixed_bandwidth](https://github.com/user-attachments/assets/95c89cc8-c33a-4a07-84e7-4165076bd253)
 
 ## Results
 
 
 ## References
 Getis, A., & Ord, J. K. (1992). The Analysis of Spatial Association by Use of Distance Statistics. Geo- graphical Analysis, 24(3), 189–206. https://doi.org/10.1111/j.1538-4632.1992.tb00261.x
+
+Páez, A., & Wheeler, D. C. (2009). Geographically weighted regression. In Encyclopedia of GIS. Elsevier. https://doi.org/10.1016/B978-008044910-400447-8
 
 Woke, G. (2023, March 24). The difference between libraries and frameworks. Simple Talk. https://www.red-gate.com/simple-talk/development/other-development/the-difference-between-libraries-and-frameworks/
 
