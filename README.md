@@ -1078,7 +1078,7 @@ ggsave("gwr_coefficients_fixed_bandwidth.png", width = 10, height = 8, dpi = 300
 
 ## Results
 
-![density_of_fires_map](https://github.com/user-attachments/assets/1edcc0cf-a9af-48b1-a0d7-a86b6a0b50ed)
+![density_of_fires_map](https://github.com/user-attachments/assets/823c254b-e497-4fc8-a871-3b12eb25c91d)
 
 Based on the density map we can see that the locaton of fires during summer 2021 were most compact in south-central BC, indicated by the yellow point on the map. This is followed by the orange points, which plot in a similar region.
 
@@ -1121,11 +1121,14 @@ The mapped result of this tutorials OLS regression can be seen in figure 12. Thi
 
 ![moran_scatter_plot_fixed](https://github.com/user-attachments/assets/41b2d9e9-43e6-4027-9d9f-e71d2f9daa53)
 
-A moans scatter plot (figure 14) was created to determine if there was any spatial autocorrelation in the residuals. The upward slope of the trendline in this scatter plot indicates positive spatial autocorrelation, meaning that the yellow/orange areas in figure 12 where there are high residuals are surrounded by neighbours that also have high residuals. The same explination applies to blue/purple areas with low residuals as they will be surrounded with neighbours that also contain low residuals. This result contradicts the main assumption of the OLS regression model and suggests the residuals are not independent. For this reason, to better address spatial dependence a geographically weighted regression was run
+A moans scatter plot (figure 14) was created to determine if there was any spatial autocorrelation in the residuals. The upward slope of the trendline in this scatter plot indicates positive spatial autocorrelation, meaning that the yellow/orange areas in figure 12 where there are high residuals are surrounded by neighbours that also have high residuals. The same explination applies to blue/purple areas with low residuals as they will be surrounded with neighbours that also contain low residuals. This result contradicts the main assumption of the OLS regression model and suggests the residuals are not independent. For this reason, to better address spatial dependence a geographically weighted regression was run.
 
 ![gwr_coefficients_fixed_bandwidth](https://github.com/user-attachments/assets/95c89cc8-c33a-4a07-84e7-4165076bd253)
 
+Figure 15 displays the GWR results. As displayed in the code, this model used a fixed bandwith of 200km. This means that in each local regression data from a 200km radius around a centroid data point was incorporated. The yellow/orange points are areas with positive coefficients and where we would expect high temperatures to be associated with high fire densities as temperature at these locations strongly influences the wildfire activity. The blue/purple points are areas with negative coefficients. At these locations higher temperatures are associated with lower fire densities, suggesting other factors may be at play to offset the impact temperature has on wildfire activity. 
 
+## Discussion
+The main message 
 
 ## References
 Getis, A., & Ord, J. K. (1992). The Analysis of Spatial Association by Use of Distance Statistics. Geo- graphical Analysis, 24(3), 189–206. https://doi.org/10.1111/j.1538-4632.1992.tb00261.x
