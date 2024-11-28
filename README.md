@@ -455,7 +455,7 @@ ggplot() +
 To answer this question, this tutorial will explain how to perform three different statistical tests; nearest neighbour analysis, quadrat analysis and k-function. These will determine if the wildfire size data are showing random, dispersed or clustered spatial patterns. To summarize point pattern analysis we will also perform a kernel density estimation based on the statistical test results. 
 
 #### Nearest Neighbour Analysis
-Nearest Neighbour Analysis is a method used to assess whether points in a spatial distribution exhibit a random, dispersed, or clustered pattern (Corvec et al., 2013). This technique works by calculating and comparing the average distance between each point and its nearest neighbor (Corvec et al., 2013). In this tutorial, this distance is utilized to evaluate the similarity or dissimilarity between data points. To determine whether our fire pattern is clustered or dispersed, we compared the observed distances to the average nearest neighbour distance expected from a random pattern with the same spatial density.
+Nearest Neighbour Analysis is a method used to assess whether points in a spatial distribution exhibit a random, dispersed, or clustered pattern (Le Corvec et al., 2013). This technique works by calculating and comparing the average distance between each point and its nearest neighbor (Le Corvec et al., 2013). In this tutorial, this distance is utilized to evaluate the similarity or dissimilarity between data points. To determine whether our fire pattern is clustered or dispersed, we compared the observed distances to the average nearest neighbour distance expected from a random pattern with the same spatial density.
 
 To conduct a nearest neighbour analysis for wildfire size (ha) across BC in the 2021 summer, we want to aquire the  average nearest neighbour value for a spatially random distribution ($$\bar{NND_R} = \frac{1}{2\sqrt{Density}}$$), the average nearest neighbour value for a perfectly dispersed pattern ($$\bar{NND_D} = \frac{1.07453}{\sqrt{Density}}$$), and a z-score ($$Z_n = \frac{\bar{NND} - \bar{NND_R}}{\sigma\bar{NND}}$$). The density is calculated by dividing the number of points by the area of BC. 
 
@@ -1131,9 +1131,28 @@ Figure 15 displays the GWR results. As displayed in the code, this model used a 
 The main message 
 
 ## References
+
+Dumas, A., Echard, B., Gayton, N., Rochat, O., Dantan, J.-Y., & Van Der Veen, S. (2013). AK-ILS: An Active learning method based on Kriging for the Inspection of Large Surfaces. Precision Engineering, 37(1), 1–9. https://doi.org/10.1016/j.precisioneng.2012.07.007
+
 Getis, A., & Ord, J. K. (1992). The Analysis of Spatial Association by Use of Distance Statistics. Geo- graphical Analysis, 24(3), 189–206. https://doi.org/10.1111/j.1538-4632.1992.tb00261.x
 
+Le Corvec, N., Spörli, K. B., Rowland, J., & Lindsay, J. (2013). Spatial distribution and alignments of volcanic centers: Clues to the formation of monogenetic volcanic fields. Earth-Science Reviews, 124, 96–114. https://doi.org/10.1016/j.earscirev.2013.05.005
+
+Lu, G. Y., & Wong, D. W. (2008). An adaptive inverse-distance weighting spatial interpolation technique. Computers & Geosciences, 34(9), 1044–1055. https://doi.org/10.1016/j.cageo.2007.07.010
+
+Majka, M. (2024). Ordinary Least Squares. ResearchGate.
+
+Moraga, P. (2024). Chapter 22 The K-function | Spatial Statistics for Data Science: Theory and Practice with R. Paulamoraga.com. https://www.paulamoraga.com/book-spatial/the-k-function.html
+
+O’sullivan, D., & D Unwin. (2010). Geographic information analysis. John Wiley & Sons.
+
 Páez, A., & Wheeler, D. C. (2009). Geographically weighted regression. In Encyclopedia of GIS. Elsevier. https://doi.org/10.1016/B978-008044910-400447-8
+
+Thomas, R. W. (1977). An Introduction to Quadrat Analysis.
+
+Węglarczyk, S. (2018). Kernel density estimation and its application. ITM Web of Conferences, 23, 00037. https://doi.org/10.1051/itmconf/20182300037
+
+What is wildfire land-based recovery? – BC Wildfire Service. (2023, January 24). https://blog.gov.bc.ca/bcwildfire/what-is-wildfire-land-based-recovery/
 
 Woke, G. (2023, March 24). The difference between libraries and frameworks. Simple Talk. https://www.red-gate.com/simple-talk/development/other-development/the-difference-between-libraries-and-frameworks/
 
