@@ -1,4 +1,4 @@
-# GEOG 418 Final Assignment - Climate Impact Analytsis
+# GEOG 418 Final Assignment - Climate Impact Analysis
 
 By Raya Rowan
 
@@ -6,7 +6,7 @@ November, 2024
 
 ## Introduction
 
-Each summer BC experiences raging wildfire activity across the province, destroying everything in its path such as wildlife habitats and residential communities. Damage such as altered drainage systems, unstabilized exposed soils, and destroyed infrastructure posed to these communities is detrimental and can last for years before full recovery is achieved (BC Wildfire Service, 2023). Furthermore, due to wildfire resulting in ground instability, post-fire hazards such as soil erosion, floods, landslides, and avalanches become an increasing concern (BC Wildfire Service, 2023). It is hypothesized that the rising temperatures experienced from May to September can be correlated with increased wildfire frequency and size in BC, suggesting wildfires may be a direct concequence of climate (Xu, 2014). Using this theory, the byproducts of high temperature such as drier soils and reduced fuel moisture can be linked to the location of wildfires in BC, providing a deeper understanding of what may have contributed to the dramatic rise in fire activity during the summer (Xu, 2014).
+Each summer BC experiences raging wildfire activity across the province, destroying everything in its path such as wildlife habitats and residential communities. Damage such as altered drainage systems, unstabilized exposed soils, and destroyed infrastructure posed to these communities is detrimental and can last for years before full recovery is achieved (BC Wildfire Service, 2023). Furthermore, due to wildfire resulting in ground instability, post-fire hazards such as soil erosion, floods, landslides, and avalanches become an increasing concern (BC Wildfire Service, 2023). It is hypothesized that the rising temperatures experienced from May to September can be correlated with increased wildfire frequency and size in BC, suggesting wildfires may be a direct consequence of climate (Xu, 2014). Using this theory, the byproducts of high temperature such as drier soils and reduced fuel moisture can be linked to the location of wildfires in BC, providing a deeper understanding of what may have contributed to the dramatic rise in fire activity during the summer (Xu, 2014).
 
 The objective of this tutorial is to utilize RStudio and its tools to analyze the correlation between temperature, location, and wildfire size in British Columbia during the summer of 2021. To conduct the following research, descriptive statistics, point pattern analysis, spatial autocorrelation, spatial interpolation and geographically weighted regression techniques will be conducted. Building on the results of this study, we can aim to address further questions, such as identifying potential patterns in wildfire behavior as temperatures continue to rise annually due to anthropogenic climate change.
 
@@ -51,9 +51,10 @@ setwd(dir)
 ```
 
 ## Study Area
-British Columbia, Canada was selected to determine temperature impacts on wildfires from May to September, 2021 because of its dense forested area and ongoing history of wildfire occurance.  
+British Columbia, Canada was selected to determine temperature impacts on wildfires from May to September, 2021 because of its dense forested area and ongoing history of wildfire occurrence.
+.  
 
-To display the study area we will create a map of BC which includes all the fire points as well as the mean center. The first step will be to load in the boundary shapefile and set the coordinate reference system (CRS) of the BC bounadry to EPSG:4326, which corresponds to the WGS84 geographic coordinate system (latitude and longitude).
+To display the study area we will create a map of BC which includes all the fire points as well as the mean center. The first step will be to load in the boundary shapefile and set the coordinate reference system (CRS) of the BC boundary to EPSG:4326, which corresponds to the WGS84 geographic coordinate system (latitude and longitude).
 
 ```{r Load in Shapefile, echo=TRUE, eval=TRUE, warning=FALSE}
 #maps package
@@ -121,7 +122,7 @@ We then create a dataframe (df) from the csv file.
 ```{r DataFrame, echo=TRUE, eval=TRUE, warning=FALSE}
 df <- as.data.frame(fire_point) 
 ```
-We are now ready to calcualte our descriptive statistics (mean, mode, standard deviation, median, skewness, kurtosis, Coefficient of Variation and normal distribution). The descripitve statistics will be based on wildfire sizes (ha). 
+We are now ready to calculate our descriptive statistics (mean, mode, standard deviation, median, skewness, kurtosis, Coefficient of Variation and normal distribution). The descriptive statistics will be based on wildfire sizes (ha). 
 
 ```{r DescriptiveStats, echo=TRUE, eval=TRUE, warning=FALSE}
 # Mean
@@ -394,7 +395,7 @@ ggsave("Temperature_Map_BC.png", plot = map, width = 10, height = 8, dpi = 300)
 
 ## Methods
 ### Evaluating Spatial Distribution of Wildfires
-To evaluate the spatial distribution of wildfires acros BC using fire point data from from May 1st to September 1st, 2021, a density map of wildfires over this time period will be created followed by point pattern analysis of the wildfire data. 
+To evaluate the spatial distribution of wildfires across BC using fire point data from from May 1st to September 1st, 2021, a density map of wildfires over this time period will be created followed by point pattern analysis of the wildfire data. 
 
 #### Density Map
 The density map will be a raster dataset representation of points per unity area across the province. The desired outcome will show us the general spread of wildfire points as well as where they are concentrated in BC.
@@ -457,7 +458,7 @@ To answer this question, this tutorial will explain how to perform three differe
 #### Nearest Neighbour Analysis
 Nearest Neighbour Analysis is a method used to assess whether points in a spatial distribution exhibit a random, dispersed, or clustered pattern (Le Corvec et al., 2013). This technique works by calculating and comparing the average distance between each point and its nearest neighbor (Le Corvec et al., 2013). In this tutorial, this distance is utilized to evaluate the similarity or dissimilarity between data points. To determine whether our fire pattern is clustered or dispersed, we compared the observed distances to the average nearest neighbour distance expected from a random pattern with the same spatial density.
 
-To conduct a nearest neighbour analysis for wildfire size (ha) across BC in the 2021 summer, we want to aquire the  average nearest neighbour value for a spatially random distribution ($$\bar{NND_R} = \frac{1}{2\sqrt{Density}}$$), the average nearest neighbour value for a perfectly dispersed pattern ($$\bar{NND_D} = \frac{1.07453}{\sqrt{Density}}$$), and a z-score ($$Z_n = \frac{\bar{NND} - \bar{NND_R}}{\sigma\bar{NND}}$$). The density is calculated by dividing the number of points by the area of BC. 
+To conduct a nearest neighbour analysis for wildfire size (ha) across BC in the 2021 summer, we want to acquire the  average nearest neighbour value for a spatially random distribution ($$\bar{NND_R} = \frac{1}{2\sqrt{Density}}$$), the average nearest neighbour value for a perfectly dispersed pattern ($$\bar{NND_D} = \frac{1.07453}{\sqrt{Density}}$$), and a z-score ($$Z_n = \frac{\bar{NND} - \bar{NND_R}}{\sigma\bar{NND}}$$). The density is calculated by dividing the number of points by the area of BC. 
 
 To calculate these results the following code can be used.
 ```{r Nearest Neighbour, echo=TRUE, eval=TRUE, warning=FALSE}
@@ -604,7 +605,7 @@ plot(k.fun.e, main = "Basic K-Function of Fires")
 
 #### Where are the Fire Hotspots Located?
 #### Kernel Density Estimation
-The kernel density estimation (KDE) is used to estimate the probability density function of a random variable (Węglarczyk et al., 2018). The KDE uses a kernal (mathematical function) to produce a smooth estimate that uses all locations of data points (Węglarczyk et al., 2018). The estimation allows us to identify clustering or dispersion features of the data more accurately than via histogram (Węglarczyk et al., 2018). The formula used to obtain the KDE is as follows: 
+The kernel density estimation (KDE) is used to estimate the probability density function of a random variable (Węglarczyk et al., 2018). The KDE uses a kernel (mathematical function) to produce a smooth estimate that uses all locations of data points (Węglarczyk et al., 2018). The estimation allows us to identify clustering or dispersion features of the data more accurately than via histogram (Węglarczyk et al., 2018). The formula used to obtain the KDE is as follows: 
 
 $$\hat\lambda_p = \frac{no. [S \in C(\boldsymbol{p, r})]}{\pi r^2}$$
 
@@ -691,9 +692,9 @@ ggsave("Clipped_IDW_Interpolation_Map.png", width = 10, height = 8, dpi = 300)
 ```
 
 #### Ordinary Kriging
-Ordinary kriging is an interpolation method in which the predictor is an optimal linear predictor, and the result is a exact interpolation (Dumas et al., 2013). This simply means that each point being predicted using kriging will be the best linear unbiased estimate and that predictions at sampled points are the same as observed values with minimal variance (Dumas et al., 2013). Kriging involves the use of a semivariogram to assign weights to known data points to make predictions at unsampled locations (O’sullivan & Unwin, 2010). The main assumption of kriging is a contant mean across the domain (O’sullivan & Unwin, 2010). In this tutorial it means that the average temperature is constant across the entire domain of BC. 
+Ordinary kriging is an interpolation method in which the predictor is an optimal linear predictor, and the result is a exact interpolation (Dumas et al., 2013). This simply means that each point being predicted using kriging will be the best linear unbiased estimate and that predictions at sampled points are the same as observed values with minimal variance (Dumas et al., 2013). Kriging involves the use of a semivariogram to assign weights to known data points to make predictions at unsampled locations (O’sullivan & Unwin, 2010). The main assumption of kriging is a constant mean across the domain (O’sullivan & Unwin, 2010). In this tutorial it means that the average temperature is constant across the entire domain of BC. 
 
-The purpose of perfoming kriging in this tutorial is to interpolate an accurate spatial representation of temperature across BC and account for areas where there are no temperature measurments. To perform kriging we will be working with our climate shapefile that was created earlier in this tutorial. Load in this file and use the function f.0 to define a formula for the kriging model with temperature as our variable of interest. 
+The purpose of performing kriging in this tutorial is to interpolate an accurate spatial representation of temperature across BC and account for areas where there are no temperature measurements. To perform kriging we will be working with our climate shapefile that was created earlier in this tutorial. Load in this file and use the function f.0 to define a formula for the kriging model with temperature as our variable of interest. 
 ```{r Kriging, echo=TRUE, eval=TRUE, warning=FALSE}
 # Read the shapefile
 climate_data <- st_read("ClimateData.shp")
@@ -852,11 +853,11 @@ ggsave("Temperature_Combo_Map.png", plot = temp_map, width = 10, height = 8, dpi
 In this part of the tutorials method section Ordinary Least Squares (OLS), Global Moran's I (using result from OLS) and Global Weighted Regression models will be conducted. These statistical tests will determine if, at a global scale across BC, the temperature variable is able to explain the variability in the density of fires during the 2021 summer months.
 
 #### Ordinary Least Squares
-Ordinary Least Squares (OLS) regression determines whether temperature explains wildfire spatial variability by modeling the relationship between the independent variable (temperature) and the dependent variable (fire) across BC. It does so by minimizing the squared differences between observed fire occurrence and the values predicted based on temperature, fitting a linear model to the data (Majka, 2024). The model evaluates how much of the variation in wildfire occurrence is explained by temperature using the proportion of variance accounted for by the independent variable. The higher the R squared value the more influence temperature has on fire spatial variability (Majka, 2024). The slope of the model determines if there is a positive, negative or negligable relationship between the variables. If the slope is positive it means that  temperature strongly influences the spatial distribution of wildfires (Majka, 2024). A negative slope indicates an inverse relationship, where an increase in temperature would result in less fire occurrence (Majka, 2024). A slope of approxinatley zero suggests no relationship between the variables (Majka, 2024).
+Ordinary Least Squares (OLS) regression determines whether temperature explains wildfire spatial variability by modeling the relationship between the independent variable (temperature) and the dependent variable (fire) across BC. It does so by minimizing the squared differences between observed fire occurrence and the values predicted based on temperature, fitting a linear model to the data (Majka, 2024). The model evaluates how much of the variation in wildfire occurrence is explained by temperature using the proportion of variance accounted for by the independent variable. The higher the R squared value the more influence temperature has on fire spatial variability (Majka, 2024). The slope of the model determines if there is a positive, negative or negligible relationship between the variables. If the slope is positive it means that  temperature strongly influences the spatial distribution of wildfires (Majka, 2024). A negative slope indicates an inverse relationship, where an increase in temperature would result in less fire occurrence (Majka, 2024). A slope of approximately zero suggests no relationship between the variables (Majka, 2024).
 
 This tutorial will now demonstrate how to calculate the residuals using OLS regression and then plot them on a map for visualization.
 
-First we will read in the final data shapefile created during the combination of temperature and fire data.
+First, we will read in the final data shapefile created during the combination of temperature and fire data.
 ```{r OLS, echo=TRUE, eval=TRUE, warning=FALSE}
 final_data_sf <- st_read("final_data.shp")
 ```
@@ -885,13 +886,13 @@ ggsave("residuals_map.png", width = 10, height = 8, dpi = 300)
 ```
 
 #### Global Moran's I
-The next step in this tutorial is to calculate the Global Moran’s I statistic using the residuals obtained from OLS. This is a measure of overall spatial autocorrelation across a given area (Getis and Ord, 1992). It assesses the degree of similarity between neighbouring spatial units based on a given variable (Getis and Ord, 1992). In this tutorial the Global Moran’s I will be determining if the residuals (differences between the observed and predicted values of fires) from the OLS regression across BC are spatially autocorrelated. It is a global scale measurement because we are considering the entirety of BC in assessing spatial autocorrelation. To determine Moran's I we must first choose a spatial weighting matrix. In this tutorial we will be using Queen's weight. A positive Moran’s I value tells us that there is positive spatial autocorrelation which translates into a clustered distribution (Getis and Ord,1992). A negative Moran’s I value indicates negative spatial autocorrelation and a dispersed distribution, and a Moran’s I value of exactly 0 means the data is randomly distributed (Getis and Ord, 1992).
+The next step in this tutorial is to calculate the Global Moran’s I statistic using the residuals obtained from OLS. This is a measure of overall spatial autocorrelation across a given area (Getis and Ord, 1992). It assesses the degree of similarity between neighbouring spatial units based on a given variable (Getis and Ord, 1992). In this tutorial the Global Moran’s I will be determining if the residuals (differences between the observed and predicted values of fires) from the OLS regression across BC are spatially autocorrelated. It is a global scale measurement because we are considering the entirety of BC in assessing spatial autocorrelation. To determine Moran's I, we must first choose a spatial weighting matrix. In this tutorial we will be using Queen's weight. A positive Moran’s I value tells us that there is positive spatial autocorrelation which translates into a clustered distribution (Getis and Ord,1992). A negative Moran’s I value indicates negative spatial autocorrelation and a dispersed distribution, and a Moran’s I value of exactly 0 means the data is randomly distributed (Getis and Ord, 1992).
  
 We can mathematically calculate the Global Moran’s I statistic using the following equation:
 
 $$I = \frac{\sum_{i=1}^n\sum_{j=1}^nW_{i,j}(x_i - \bar{x})(x_j - \bar{x})}{(\sum_{i=1}^n\sum_{j=1}^nW_{i,j})\sum_{i=1}^n(x_i - \bar{x})^2}$$
 
-Where x is the variable being determined and (i) is our point of interest, xi is the value of the variable at (i). xj is a neighbout to xi. (xi - x) displays how similar the point is to the mean and (xj - x) displays how similar the neighbour is to the mean. Wi,j is the spatial weighting matrix (  both the differences are multiplied by. To find the Global Moran’s I we sum the differences between the points and neighbours across the study area to measure covariance in the numberator. The denominator is used to standardize our values.
+Where x is the variable being determined and (i) is our point of interest, xi is the value of the variable at (i). xj is a neighbour to xi. (xi - x) displays how similar the point is to the mean and (xj - x) displays how similar the neighbour is to the mean. Wi,j is the spatial weighting matrix (  both the differences are multiplied by. To find the Global Moran’s I we sum the differences between the points and neighbours across the study area to measure covariance in the numerator. The denominator is used to standardize our values.
 
 The following code is how Moran's I can be determined for the OLS regression residuals using the Queen's weighting scheme. 
 
@@ -982,7 +983,7 @@ dev.off()
 #### Geographically Weighted Regression
 Since the Global Moran's I indicated positive spatial autocorrelation, the main OLS assumption stating that residuals are independent is violated and a geographically weighted regression (GWR) must be conducted. This analysis is more complex than the OLS regression as it allows for the regression coefficients to vary spatially, meaning the relationship between variables can change depending on the location (Páez & Wheeler, 2009). It does this by fitting regression models at each location instead of using a single global regression model and therefore is not as influenced by spatial autocorrelation (Páez & Wheeler, 2009). 
 
-Using GWR we will be able to identify where across BC temperature has significant influence on fire occurance compared to where it has negligable effects.
+Using GWR we will be able to identify where across BC temperature has significant influence on fire occurrence  compared to where it has negligible effects.
 
 The following steps are done to prepare the data for GWR.
 ```{r GWR, echo=TRUE, eval=TRUE, warning=FALSE}
@@ -1080,15 +1081,15 @@ ggsave("gwr_coefficients_fixed_bandwidth.png", width = 10, height = 8, dpi = 300
 
 ![density_of_fires_map](https://github.com/user-attachments/assets/823c254b-e497-4fc8-a871-3b12eb25c91d)
 
-Based on the density map we can see that the locaton of fires during summer 2021 were most compact in south-central BC, indicated by the yellow point on the map. This is followed by the orange points, which plot in a similar region.
+Based on the density map we can see that the location  of fires during summer 2021 were most compact in south-central BC, indicated by the yellow point on the map. This is followed by the orange points, which plot in a similar region.
 
 #### Is the Relative Size and Frequency of Wildfires Location Dependant Across BC in Summer 2021?
 
-This section of the report will outline the results of the the three statistical tests (nearest neighbour analysis, quadrat analysis and k-function). 
+This section of the report will outline the results of the three statistical tests (nearest neighbour analysis, quadrat analysis and k-function). 
 
 ![Output_Table3](https://github.com/user-attachments/assets/f4d82e8c-59f1-436a-a6d8-c1e3f77259f9)
 
-Beginning with the nearest neighbour analysis, we can see in table 3 that on average fires are approximately 27.3 km apart, however if they were to be randomly distributed we would expect them to be 12.7 km apart. The outputted NND test value show a clustered pattern when compared to the values for NNDd and NNDr. This is because the NND value of 57.2 is smaller than that for NNDr. According to the nearest neighbour method, the z-value of -73.07 confirms that there is strong evidence for fires of similar size (ha) in BC during the summer of 2021 being extremely clustered.
+Beginning with the nearest neighbour analysis, we can see in table 3 that on average fires are approximately 27.3 km apart, however if they were to be randomly distributed, we would expect them to be 12.7 km apart. The outputted NND test value shows a clustered pattern when compared to the values for NNDd and NNDr. This is because the NND value of 57.2 is smaller than that for NNDr. According to the nearest neighbour method, the z-value of -73.07 confirms that there is strong evidence for fires of similar size (ha) in BC during the summer of 2021 being extremely clustered.
 
 ![Output_Table4](https://github.com/user-attachments/assets/de68401a-3a92-4492-aaee-57ac481ad108)
 
@@ -1101,7 +1102,7 @@ The K-function further suggests spatial clustering of fires in the summer of 202
 #### Where are the Fire Hotspots Located?
 ![Kernal Density](https://github.com/user-attachments/assets/db3954a7-88c1-4a2c-9f7b-693e9f70a9a5)
 
-This kernel density estimation in figure 7 confirms the clustering patterns indictaed by the K-function. The yellow/red areas display the hotspots in BC where fires were concentrated/clustered. These results align well with the denisty map.
+This kernel density estimation in figure 7 confirms the clustering patterns indicated by the K-function. The yellow/red areas display the hotspots in BC where fires were concentrated/clustered. These results align well with the density map.
 
 ![Clipped_IDW_Interpolation_Map](https://github.com/user-attachments/assets/01a078fc-cd47-47a8-9479-8294bf175eed)
 
@@ -1113,7 +1114,7 @@ Figure 10 displays the interpolated temperature surface using the kriging techni
 
 ![Temperature_Combo_Map](https://github.com/user-attachments/assets/24fb9640-ef15-4d92-9aff-425a37881f68)
 
-Figure 11 overlays the interpolated temperature surface (aquired using clipped IDW results) with fire density results, allowing us to identify potential relationships between temperature and fire density. Yellow to orange regions likely correspond to areas with higher fire densities while purple regions likely represent areas with lower fire density. Again, we can see southern regions displaying warmer temperatures and northern regions colder temperatures.
+Figure 11 overlays the interpolated temperature surface (acquired using clipped IDW results) with fire density results, allowing us to identify potential relationships between temperature and fire density. Yellow to orange regions likely correspond to areas with higher fire densities while purple regions likely represent areas with lower fire density. Again, we can see southern regions displaying warmer temperatures and northern regions colder temperatures.
 
 ![residuals_map](https://github.com/user-attachments/assets/7458aaf2-bea9-43f3-be6d-d1584e1caef0)
 
@@ -1121,14 +1122,14 @@ The mapped result of this tutorials OLS regression can be seen in figure 12. Thi
 
 ![moran_scatter_plot_fixed](https://github.com/user-attachments/assets/41b2d9e9-43e6-4027-9d9f-e71d2f9daa53)
 
-A moans scatter plot (figure 14) was created to determine if there was any spatial autocorrelation in the residuals. The upward slope of the trendline in this scatter plot indicates positive spatial autocorrelation, meaning that the yellow/orange areas in figure 12 where there are high residuals are surrounded by neighbours that also have high residuals. The same explination applies to blue/purple areas with low residuals as they will be surrounded with neighbours that also contain low residuals. This result contradicts the main assumption of the OLS regression model and suggests the residuals are not independent. For this reason, to better address spatial dependence a geographically weighted regression was run.
+A moans scatter plot (figure 14) was created to determine if there was any spatial autocorrelation in the residuals. The upward slope of the trendline in this scatter plot indicates positive spatial autocorrelation, meaning that the yellow/orange areas in figure 12 where there are high residuals are surrounded by neighbours that also have high residuals. The same explanation applies to blue/purple areas with low residuals as they will be surrounded with neighbours that also contain low residuals. This result contradicts the main assumption of the OLS regression model and suggests the residuals are not independent. For this reason, to better address spatial dependence a geographically weighted regression was run.
 
 ![gwr_coefficients_fixed_bandwidth](https://github.com/user-attachments/assets/95c89cc8-c33a-4a07-84e7-4165076bd253)
 
-Figure 15 displays the GWR results. As displayed in the code, this model used a fixed bandwith of 200km. This means that in each local regression data from a 200km radius around a centroid data point was incorporated. The yellow/orange points are areas with positive coefficients and where we would expect high temperatures to be associated with high fire densities as temperature at these locations strongly influences the wildfire activity. The blue/purple points are areas with negative coefficients. At these locations higher temperatures are associated with lower fire densities, suggesting other factors may be at play to offset the impact temperature has on wildfire activity. 
+Figure 15 displays the GWR results. As displayed in the code, this model used a fixed bandwidth of 200km. This means that in each local regression data from a 200km radius around a centroid data point was incorporated. The yellow/orange points are areas with positive coefficients and where we would expect high temperatures to be associated with high fire densities as temperature at these locations strongly influences the wildfire activity. The blue/purple points are areas with negative coefficients. At these locations higher temperatures are associated with lower fire densities, suggesting other factors may be at play to offset the impact temperature has on wildfire activity. 
 
 ## Discussion
-The main message 
+The main message stemming from the results of this tutorial is that temperature does 
 
 ## References
 
