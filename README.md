@@ -847,7 +847,6 @@ write.csv(final_data_df, "final_data.csv", row.names = FALSE)
 # Save the map as a PNG
 ggsave("Temperature_Combo_Map.png", plot = temp_map, width = 10, height = 8, dpi = 300)
 ```
-![Temperature_Combo_Map](https://github.com/user-attachments/assets/24fb9640-ef15-4d92-9aff-425a37881f68)
 
 ### Determining if Temperature Explains Wildfire Spatial Variability
 In this part of the tutorials method section Ordinary Least Squares (OLS), Global Moran's I (using result from OLS) and Global Weighted Regression models will be conducted. These statistical tests will determine if, at a global scale across BC, the temperature variable is able to explain the variability in the density of fires during the 2021 summer months.
@@ -884,7 +883,6 @@ ggplot(data = final_data_sf) +
 # Save the plot if desired
 ggsave("residuals_map.png", width = 10, height = 8, dpi = 300)
 ```
-![residuals_map](https://github.com/user-attachments/assets/7458aaf2-bea9-43f3-be6d-d1584e1caef0)
 
 #### Global Moran's I
 The next step in this tutorial is to calculate the Global Moran’s I statistic using the residuals obtained from OLS. This is a measure of overall spatial autocorrelation across a given area (Getis and Ord, 1992). It assesses the degree of similarity between neighbouring spatial units based on a given variable (Getis and Ord, 1992). In this tutorial the Global Moran’s I will be determining if the residuals (differences between the observed and predicted values of fires) from the OLS regression across BC are spatially autocorrelated. It is a global scale measurement because we are considering the entirety of BC in assessing spatial autocorrelation. To determine Moran's I we must first choose a spatial weighting matrix. In this tutorial we will be using Queen's weight. A positive Moran’s I value tells us that there is positive spatial autocorrelation which translates into a clustered distribution (Getis and Ord,1992). A negative Moran’s I value indicates negative spatial autocorrelation and a dispersed distribution, and a Moran’s I value of exactly 0 means the data is randomly distributed (Getis and Ord, 1992).
@@ -980,7 +978,6 @@ mtext("Figure 14: Moran's I Scatter Plot of Residuals", side = 1, line = 4, cex 
 # Close the graphics device
 dev.off()
 ```
-![moran_scatter_plot_fixed](https://github.com/user-attachments/assets/41b2d9e9-43e6-4027-9d9f-e71d2f9daa53)
 
 #### Geographically Weighted Regression
 Since the Global Moran's I indicated positive spatial autocorrelation, the main OLS assumption stating that residuals are independent is violated and a geographically weighted regression (GWR) must be conducted. This analysis is more complex than the OLS regression as it allows for the regression coefficients to vary spatially, meaning the relationship between variables can change depending on the location (Páez & Wheeler, 2009). It does this by fitting regression models at each location instead of using a single global regression model and therefore is not as influenced by spatial autocorrelation (Páez & Wheeler, 2009). 
@@ -1113,8 +1110,19 @@ The clipped IDW results displayed by figure 8 show that the highest temperatures
 
 ![Raster](https://github.com/user-attachments/assets/5ad3a820-21d7-47ab-afec-ae6e156c5c94)
 
+Figure 10 displays the interpolated temperature surface using the kriging technique to capture gradual spatial trends in temperature across BC. The map indicates that the predicted temperature ranges from 13°C to 16.5°C and that cooler temperatures dominate higher altitude regions in northern BC while warmer temperatures are predicted in the lower altitude and southern regions.
 
+![Temperature_Combo_Map](https://github.com/user-attachments/assets/24fb9640-ef15-4d92-9aff-425a37881f68)
 
+Figure 11 overlays the interpolated temperature surface (aquired using clipped IDW results) with fire density results, allowing us to identify potential relationships between temperature and fire density. Yellow to orange regions likely correspond to areas with higher fire densities while purple regions likely represent areas with lower fire density. Again, we can see southern regions displaying warmer temperatures and northern regions colder temperatures.
+
+![residuals_map](https://github.com/user-attachments/assets/7458aaf2-bea9-43f3-be6d-d1584e1caef0)
+
+Figure 12 is the mapped result of this tutorials OLS regression. The map displays the difference between observed fire density and predicted values based on temperature as 'residuals'. The purple/blue regions are where the model overpredicted fire density and the yellow/orange regions are where the model underpredicted fire density and indicate where the interpolated temperature surface did not accurately predict fire density. Areas with low residuals represent regions in BC that temperature is a good predictor of fire density and areas with high residuals indicate where temperature is not as accurate in predicting fire density.
+
+![moran_scatter_plot_fixed](https://github.com/user-attachments/assets/41b2d9e9-43e6-4027-9d9f-e71d2f9daa53)
+
+A moans scatter plot (figure 14) was created to determine if there was any spatial autocorrelation in the residuals. The upward slope of the trendline in this scatter plot indicates positive spatial autocorrelation meaning that the yellow/orange areas in figure 12 where there are high residuals are surrounded by neighbours that also have high residuals. The same explination applies to blue/purple areas with low residuals. This result contradicts the main assumption of the OLS regression model and suggests the residuals are not independent.
 
 
 ## References
