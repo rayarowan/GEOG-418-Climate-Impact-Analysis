@@ -1108,7 +1108,7 @@ This kernel density estimation in Figure 7 confirms the clustering patterns indi
 
 The clipped IDW results displayed in Figure 8 show that the highest temperatures (temperatures above 16°C) occur around the south-central region of BC. 
 
-![Raster](https://github.com/user-attachments/assets/5ad3a820-21d7-47ab-afec-ae6e156c5c94)
+![Raster](https://github.com/user-attachments/assets/3717a904-a7dd-49da-9257-756952ca95ed)
 
 Figure 10 displays the interpolated temperature surface using the kriging technique to capture gradual spatial trends in temperature across BC. The map indicates that the predicted temperature ranges from 13°C to 16.5°C and that cooler temperatures dominate higher altitude regions in northern BC while warmer temperatures are predicted in the lower altitude and southern regions.
 
@@ -1122,14 +1122,14 @@ The mapped result of this tutorials OLS regression can be seen in Figure 12. Thi
 
 ![moran_scatter_plot_fixed](https://github.com/user-attachments/assets/41b2d9e9-43e6-4027-9d9f-e71d2f9daa53)
 
-A moans scatter plot (figure 14) was created to determine if there was any spatial autocorrelation in the residuals. The upward slope of the trendline in this scatter plot indicates positive spatial autocorrelation, meaning that the yellow/orange areas in Figure 12 where there are high residuals are surrounded by neighbours that also have high residuals. The same explanation applies to blue/purple areas with low residuals as they will be surrounded by neighbours that also contain low residuals. This result contradicts the main assumption of the OLS regression model and suggests the residuals are not independent. For this reason, to better address spatial dependence a geographically weighted regression was run.
+A moans scatter plot (Figure 14) was created to determine if there was any spatial autocorrelation in the residuals. The upward slope of the trendline in this scatter plot indicates positive spatial autocorrelation, meaning that the yellow/orange areas in Figure 12 where there are high residuals are surrounded by neighbours that also have high residuals. The same explanation applies to blue/purple areas with low residuals as they will be surrounded by neighbours that also contain low residuals. This result contradicts the main assumption of the OLS regression model and suggests the residuals are not independent. For this reason, to better address spatial dependence a geographically weighted regression was run.
 
 ![gwr_coefficients_fixed_bandwidth](https://github.com/user-attachments/assets/95c89cc8-c33a-4a07-84e7-4165076bd253)
 
 Figure 15 displays the GWR results. As displayed in the code, this model used a fixed bandwidth of 200km. This means that in each local regression data from a 200km radius around a centroid data point was incorporated. The yellow/orange points are areas with positive coefficients and where we would expect high temperatures to be associated with high fire densities as temperature at these locations strongly influences the wildfire activity. The blue/purple points are areas with negative coefficients. At these locations higher temperatures are associated with lower fire densities, suggesting other factors may be at play to offset the impact temperature has on wildfire activity. 
 
 ## Discussion
-The main message stemming from the results of this tutorial is that temperature does 
+The main message stemming from the results of this tutorial is that in the southern central regions of British Columbia, from May to September 2021, high temperatures were a primary cause of wildfire occurrence. Higher temperatures here resulted in regions with more fires. Elsewhere in BC, particularly in the northern regions, temperature is not seen to influence wildfire occurrence as strongly. 
 
 ## References
 
