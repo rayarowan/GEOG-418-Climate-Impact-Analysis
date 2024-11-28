@@ -1075,7 +1075,6 @@ ggplot(data = gwr_output_sf_fixed) +
 # Optional: Save the plot
 ggsave("gwr_coefficients_fixed_bandwidth.png", width = 10, height = 8, dpi = 300)
 ```
-![gwr_coefficients_fixed_bandwidth](https://github.com/user-attachments/assets/95c89cc8-c33a-4a07-84e7-4165076bd253)
 
 ## Results
 
@@ -1118,11 +1117,14 @@ Figure 11 overlays the interpolated temperature surface (aquired using clipped I
 
 ![residuals_map](https://github.com/user-attachments/assets/7458aaf2-bea9-43f3-be6d-d1584e1caef0)
 
-Figure 12 is the mapped result of this tutorials OLS regression. The map displays the difference between observed fire density and predicted values based on temperature as 'residuals'. The purple/blue regions are where the model overpredicted fire density and the yellow/orange regions are where the model underpredicted fire density and indicate where the interpolated temperature surface did not accurately predict fire density. Areas with low residuals represent regions in BC that temperature is a good predictor of fire density and areas with high residuals indicate where temperature is not as accurate in predicting fire density.
+The mapped result of this tutorials OLS regression can be seen in figure 12. This map displays the difference between observed fire density and predicted values based on temperature as 'residuals'. The purple/blue regions are where the model overpredicted fire density and the yellow/orange regions are where the model underpredicted fire density and indicate where the interpolated temperature surface did not accurately predict fire density. Areas with low residuals represent regions in BC that temperature is a good predictor of fire density and areas with high residuals indicate where temperature is not as accurate in predicting fire density.
 
 ![moran_scatter_plot_fixed](https://github.com/user-attachments/assets/41b2d9e9-43e6-4027-9d9f-e71d2f9daa53)
 
-A moans scatter plot (figure 14) was created to determine if there was any spatial autocorrelation in the residuals. The upward slope of the trendline in this scatter plot indicates positive spatial autocorrelation meaning that the yellow/orange areas in figure 12 where there are high residuals are surrounded by neighbours that also have high residuals. The same explination applies to blue/purple areas with low residuals. This result contradicts the main assumption of the OLS regression model and suggests the residuals are not independent.
+A moans scatter plot (figure 14) was created to determine if there was any spatial autocorrelation in the residuals. The upward slope of the trendline in this scatter plot indicates positive spatial autocorrelation, meaning that the yellow/orange areas in figure 12 where there are high residuals are surrounded by neighbours that also have high residuals. The same explination applies to blue/purple areas with low residuals as they will be surrounded with neighbours that also contain low residuals. This result contradicts the main assumption of the OLS regression model and suggests the residuals are not independent. For this reason, to better address spatial dependence a geographically weighted regression was run
+
+![gwr_coefficients_fixed_bandwidth](https://github.com/user-attachments/assets/95c89cc8-c33a-4a07-84e7-4165076bd253)
+
 
 
 ## References
