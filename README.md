@@ -6,13 +6,13 @@ November, 2024
 
 ## Introduction
 
-Each summer BC experiences raging wildfire activity across the province, destroying everything in its path such as wildlife habitats and residential communities. Damage such as altered drainage systems, unstabilized exposed soils, and destroyed infrastructure posed to these communities is detrimental and can last for years before full recovery is achieved (BC Wildfire Service, 2023). Furthermore, due to wildfire resulting in ground instability, post-fire hazards such as soil erosion, floods, landslides, and avalanches become an increasing concern (BC Wildfire Service, 2023). It is hypothesized that the rising temperatures experienced from May to September can be correlated with increased wildfire frequency and size in BC, suggesting wildfires may be a direct consequence of climate (Xu, 2014). Using this theory, the byproducts of high temperature such as drier soils and reduced fuel moisture can be linked to the location of wildfires in BC, providing a deeper understanding of what may have contributed to the dramatic rise in fire activity during the summer (Xu, 2014).
+Each summer BC experiences raging wildfire activity across the province, destroying everything in its path such as wildlife habitats and residential communities. Damage such as altered drainage systems, unstabilized exposed soils, and destroyed infrastructure posed to these communities is detrimental and can last for years before full recovery is achieved (BC Wildfire Service, 2023). Furthermore, due to wildfire resulting in ground instability, post-fire hazards such as soil erosion, floods, landslides, and avalanches have become an increasing concern (BC Wildfire Service, 2023). It is hypothesized that the rising temperatures experienced from May to September can be correlated with increased wildfire frequency and size in BC, suggesting wildfires may be a direct consequence of climate (Xu, 2014). Using this theory, the byproducts of high temperatures such as drier soils and reduced fuel moisture can be linked to the location of wildfires in BC, providing a deeper understanding of what may have contributed to the dramatic rise in fire activity during the summer (Xu, 2014).
 
 The objective of this tutorial is to utilize RStudio and its tools to analyze the correlation between temperature, location, and wildfire size in British Columbia during the summer of 2021. To conduct the following research, descriptive statistics, point pattern analysis, spatial autocorrelation, spatial interpolation and geographically weighted regression techniques will be conducted. Building on the results of this study, we can aim to address further questions, such as identifying potential patterns in wildfire behavior as temperatures continue to rise annually due to anthropogenic climate change.
 
 Results from the above statistical techniques will be displayed as tables, maps, and graphs using RStudio libraries throughout this tutorial.
 
-The first step is to install the desired packages. When a package is installed using the function intsall.packages("package") it is stored in a directory called the library (https://www.datacamp.com/doc/r/packages, 2024). These libraries are collections of pre-written code used to complete specific tasks while still maintaining control over R's flow (Woke, 2023). They are beneficial as they act like a short cut, reducing the amount of code needed to be written and can be called upon in the script when needed (Woke, 2023). To install a library we use the code library("package"). After installation of the library R will contain documentation specifying proper syntax and use for that package. This information can be found under Packages in the panel on the bottom right side of the page. The below packages are what will be used for this studies statistical analyses.
+The first step is to install the desired packages. When a package is installed using the function intsall.packages("package") it is stored in a directory called the library (https://www.datacamp.com/doc/r/packages, 2024). These libraries are collections of pre-written code used to complete specific tasks while still maintaining control over R's flow (Woke, 2023). They are beneficial as they act like a shortcut, reducing the amount of code needed to be written and can be called upon in the script when needed (Woke, 2023). To install a library we use the code library("package"). After installation of the library R will contain documentation specifying proper syntax and use for that package. This information can be found under Packages in the panel on the bottom right side of the page. The below packages are what will be used for this study's statistical analyses.
 
 ```{r Libraries, echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE}
 # Install packages if not already installed:
@@ -43,7 +43,7 @@ library(dplyr)
 library(viridis)
 library(grid)
 ```
-The next step is to set the working directory. This will be the folder or location on your computer that R pulls files from and saves your work to. Do set the working directory use the code dir <- "name of folder/location" followed by setwd(dir). An example of how this is done can be viewed below. I am pulling my data stored in a folder labeled Assignment 4 within a folder labelled GEOG 418 located on my desktop.
+The next step is to set the working directory. This will be the folder or location on your computer that R pulls files from and saves your work. To set the working directory use the code dir <- "name of folder/location" followed by setwd(dir). An example of how this is done can be viewed below. I am pulling my data stored in a folder labeled Assignment 4 within a folder labeled GEOG 418 located on my desktop.
 
 ```{r Read in data, echo=TRUE, eval=TRUE, warning=FALSE}
 dir <- "~/Desktop/GEOG 418/Assignment 4"
@@ -51,7 +51,7 @@ setwd(dir)
 ```
 
 ## Study Area
-British Columbia, Canada was selected to determine temperature impacts on wildfires from May to September, 2021 because of its dense forested area and ongoing history of wildfire occurrence.
+British Columbia, Canada was selected to determine temperature impacts on wildfires from May to September 2021 because of its dense forested area and ongoing history of wildfire occurrence.
 .  
 
 To display the study area we will create a map of BC which includes all the fire points as well as the mean center. The first step will be to load in the boundary shapefile and set the coordinate reference system (CRS) of the BC boundary to EPSG:4326, which corresponds to the WGS84 geographic coordinate system (latitude and longitude).
@@ -66,7 +66,7 @@ After this we create spatial points for wildfire locations by extracting the lon
 #tm package
 coords <- df[, c("LONGITUDE", "LATITUDE")] #store coordinates in new object
 crs <- CRS("+init=epsg:4326") #store the coordinate system (CRS) in a new object
-firePoints <- SpatialPointsDataFrame(coords = coords, data = df, proj4string = crs) #make new spatial points object using coodinates, data, and projection
+firePoints <- SpatialPointsDataFrame(coords = coords, data = df, proj4string = crs) #make new spatial points object using coordinates, data, and projection
 ```
 The mean center point is then calculated and a spatial points object (meanCenterPoint) is created to represent the mean center of the wildfire points.
 ```{r Mean Center Point, echo=TRUE, eval=TRUE, warning=FALSE}
@@ -76,7 +76,7 @@ coords2 <- meanCenter[, c("long", "lat")]
 crs2 <- CRS("+init=epsg:4326")
 meanCenterPoint <- SpatialPointsDataFrame(coords = coords2, data = meanCenter, proj4string = crs2)
 ```
-Using the tmap package installed earlier, we can now create and print the map as a PNG with a caption (TmMap.png). This map output will be found in your working directory under the designated name. For example, in my case it will be a png file named TmMap.
+Using the tmap package installed earlier, we can now create and print the map as a PNG with a caption (TmMap.png). This map output will be found in your working directory under the designated name. For example, in my case, it will be a png file named TmMap.
 ```{r Creating Map, echo=TRUE, eval=TRUE, warning=FALSE}
 map_TM <- tm_shape(bc_boundary) + 
   tm_fill(col = "gray50") +  
@@ -107,7 +107,7 @@ dev.off()
 ### Descriptive Statistics
 The first step in conducting this research is to perform descriptive statistics on the fire point data. 
 
-The below code displays how we read the fire point .csv from the current working directory into a dataframe called data. Since the dataframe contains dates ranging across 2021, we want to filter the data to be from May 1st, 2021 to September 1st, 2021 and store the filtered data in a new object called fire_point. To do this we must extract the IGN_DATE from the dataframe and take the first 8 characters of the IGN_DATE column. We then convert the extracted substring to the date type using the format %Y%m%d (year, month, day).
+The below code displays how we read the fire point .csv from the current working directory into a data frame called data. Since the data frame contains dates ranging across 2021, we want to filter the data to be from May 1st, 2021 to September 1st, 2021, and store the filtered data in a new object called fire_point. To do this we must extract the IGN_DATE from the dataframe and take the first 8 characters of the IGN_DATE column. We then convert the extracted substring to the date type using the format %Y%m%d (year, month, day).
 
 ```{r Read in data, echo=TRUE, eval=TRUE, warning=FALSE}
 # Load wildfire point data and set CRS if needed
@@ -122,7 +122,7 @@ We then create a dataframe (df) from the csv file.
 ```{r DataFrame, echo=TRUE, eval=TRUE, warning=FALSE}
 df <- as.data.frame(fire_point) 
 ```
-We are now ready to calculate our descriptive statistics (mean, mode, standard deviation, median, skewness, kurtosis, Coefficient of Variation and normal distribution). The descriptive statistics will be based on wildfire sizes (ha). 
+We are now ready to calculate our descriptive statistics (mean, mode, standard deviation, median, skewness, kurtosis, Coefficient of Variation, and normal distribution). The descriptive statistics will be based on wildfire sizes (ha). 
 
 ```{r DescriptiveStats, echo=TRUE, eval=TRUE, warning=FALSE}
 # Mean
@@ -200,9 +200,9 @@ dev.off()
 ```
 ![Output_Table1](https://github.com/user-attachments/assets/9a8ab686-fc92-4e70-b5d9-0f177b5e03b1) ![Output_Table2](https://github.com/user-attachments/assets/533ccb07-eac1-4e3a-836b-ae1c0c3022ce)
 
-The descriptive statistics suggest that the mean wildfire size is approximately 588 ha. However, due to a high standard deviation (5172.356) and extremely right-skewed distribution (13.886), the mean is not be an accurate representation of the average wildfire size. Instead, it was likely that during the 2021 summer, most fires were relatively small (0.009 ha) with a few very large fires representing the outlier data points and skewing the data.
+The descriptive statistics suggest that the mean wildfire size is approximately 588 ha. However, due to a high standard deviation (5172.356) and extremely right-skewed distribution (13.886), the mean is not an accurate representation of the average wildfire size. Instead, it was likely that during the 2021 summer, most fires were relatively small (0.009 ha) with a few very large fires representing the outlier data points and skewing the data.
 
-To analyse the size frequency of fires as well as the frequency of fires per month in BC during the summer of 2021 we can create a histogram and bar graph using the following code. 
+To analyze the size frequency of fires as well as the frequency of fires per month in BC during the summer of 2021 we can create a histogram and bar graph using the following code. 
 ```{r DescriptiveStats, echo=TRUE, eval=TRUE, warning=FALSE}
 # Histogram to display the size frequency of fires
 png("Output_Histogram.png")
@@ -248,7 +248,7 @@ dev.off()
 Based on the histogram results it is apparent that there were wildfires of varying sizes, with larger fires having occurred less frequently than smaller fires and the average fire size being 0.009 ha (representative of the calculated mode). The bar graph indicates that during summer 2021 the month of July experienced the highest frequency of fires, followed by June, August then May. 
 
 ### Data
-To conduct this report historical fire point data was collected from the BC Data Catalogue database, retrieved from https://catalogue.data.gov.bc.ca/dataset/bc-wildfire-fire-perimeters-historical. The fire data includes relevant information such as fire number, fire year, ignition date, latitude, longitude and fire size (ha). Temperature data was collected from the Weather Station Data Portal from the Pacific Climate Impacts Consortium (PCIC), retreived from https://services.pacificclimate.org/met-data-portal-pcds/app/. The temperature data was parameterized to be collected from May 1st, 2021 to September 1st, 2021 from the WMB network and includes wind direction, relative humidity, average wind speed, precipitation, temperature and time.
+To conduct this report historical fire point data was collected from the BC Data Catalogue database, retrieved from https://catalogue.data.gov.bc.ca/dataset/bc-wildfire-fire-perimeters-historical. The fire data includes relevant information such as fire number, fire year, ignition date, latitude, longitude, and fire size (ha). Temperature data was collected from the Weather Station Data Portal from the Pacific Climate Impacts Consortium (PCIC), retrieved from https://services.pacificclimate.org/met-data-portal-pcds/app/. The temperature data was parameterized to be collected from May 1st, 2021 to September 1st, 2021 from the WMB network and includes wind direction, relative humidity, average wind speed, precipitation, temperature,e and time.
 
 Following the collection of data, we must clean it so it is relevant and useable for our desired outcomes. To begin this process we must create an empty CSV file dataframe with columns Native.ID, TEMP, Longitude, Latitude and save it as BC_AVG_TEMP.csv for future appending.
 ```{r Cleaning Data echo=TRUE, eval=TRUE, warning=FALSE}
@@ -269,13 +269,13 @@ Each CSV file is then looped through, reading the file into the datafram hourly_
 for (file in csv_files) {
     hourly_data <- read.csv(file, skip = 1, header = TRUE)
 ```
-Time is then converted into a desired datetime format. In this case we want hourly temperature data from May to September, 2021.
+Time is then converted into a desired datetime format. In this case, we want hourly temperature data from May to September 2021.
 ```{r Cleaning Data, echo=TRUE, eval=TRUE, warning=FALSE}
 hourly_data$temperature <- as.numeric(hourly_data$temperature)
 hourly_data <- hourly_data %>%
   filter(!is.na(temperature))
 ```
-The daily average temperature is then calculated and converted into monthly average temperature.
+The daily average temperature is then calculated and converted into the monthly average temperature.
 ```{r Cleaning Data, echo=TRUE, eval=TRUE, warning=FALSE}
 daily_avg_temp <- hourly_data %>%
   group_by(date = as.Date(time)) %>%
@@ -286,13 +286,13 @@ monthly_avg_temp <- hourly_data %>%
   summarize(monthly_avg_temp = mean(temperature, na.rm = TRUE)) %>%
   ungroup()
 ```
-Finally, we filter the data for the months May to September and calculate the average temperature of these months.
+Finally, we filter the data for the months of May to September and calculate the average temperature of these months.
 ```{r Cleaning Data, echo=TRUE, eval=TRUE, warning=FALSE}
 average_temp_may_september <- hourly_data %>%
   filter(month(time) >= 5 & month(time) <= 9) %>%
   summarize(TEMP = mean(temperature, na.rm = TRUE))
 ```
-The file name is then extracted with its extension. The extension is then removed and a new row is created and attatched to the existing CSV file with the file name and calculated temperature.
+The file name is then extracted with its extension. The extension is then removed and a new row is created and attached to the existing CSV file with the file name and calculated temperature.
 ```{r Cleaning Data, echo=TRUE, eval=TRUE, warning=FALSE}
 # Extract the filename (with extension)
 file_name <- basename(file_name)
@@ -320,7 +320,7 @@ output_file_path <- csv_file_name
 write.csv(data, file = output_file_path, row.names = FALSE)
 }
 ```
-We then merge station metadata and the aggregated temperature data using the common column, Native.ID. After this the last two columns which are duplicate Latitude and Longitude are removed. 
+We then merge station metadata and the aggregated temperature data using the common column, Native.ID. After this, the last two columns which are duplicate Latitude and Longitude are removed. 
 ```{r Cleaning Data, echo=TRUE, eval=TRUE, warning=FALSE}
 # Read in metadata
 metadata <- read.csv("./station_metadata.csv")
@@ -344,7 +344,7 @@ Finally save the cleaned, merged dataset to your working directory as ClimateDat
 ```{r Cleaning Data, echo=TRUE, eval=TRUE, warning=FALSE}
 write.csv(merged_data, file = "ClimateData.csv", row.names = FALSE)
 ```
-To ensure the data has been correctly cleaned we will now map our newley created climate data and visualize the temperature points across BC. To begin this process read in the 'ClimateData' CSV file.
+To ensure the data has been correctly cleaned we will now map our newly created climate data and visualize the temperature points across BC. To begin this process read in the 'ClimateData' CSV file.
 ```{r Mapping Cleaning Data, echo=TRUE, eval=TRUE, warning=FALSE}
 climate_data <- read.csv("ClimateData.csv")
 ```
@@ -354,7 +354,7 @@ climate_data <- climate_data %>%
    mutate(Latitude = as.numeric(Latitude),
         Longitude = as.numeric(Longitude))
 ```
-Following this step we will convert the data to a simple feature object, set the CRS to 4326 and save the new simple feature as a shapefile. 
+Following this step we will convert the data to a simple feature object, set the CRS to 4326, and save the new simple feature as a shapefile. 
 ```{r Mapping Cleaning Data, echo=TRUE, eval=TRUE, warning=FALSE}
 climate_sf <- st_as_sf(climate_data, coords = c("Longitude", "Latitude"), crs = 4326)
 st_write(climate_sf, "ClimateData.shp")
@@ -395,7 +395,7 @@ ggsave("Temperature_Map_BC.png", plot = map, width = 10, height = 8, dpi = 300)
 
 ## Methods
 ### Evaluating Spatial Distribution of Wildfires
-To evaluate the spatial distribution of wildfires across BC using fire point data from from May 1st to September 1st, 2021, a density map of wildfires over this time period will be created followed by point pattern analysis of the wildfire data. 
+To evaluate the spatial distribution of wildfires across BC using fire point data from from May 1st to September 1st, 2021, a density map of wildfires over this period will be created followed by a point pattern analysis of the wildfire data. 
 
 #### Density Map
 The density map will be a raster dataset representation of points per unity area across the province. The desired outcome will show us the general spread of wildfire points as well as where they are concentrated in BC.
@@ -453,7 +453,7 @@ ggplot() +
 
 #### Point Pattern Analysis
 ##### Is the Relative Size and Frequency of Wildfires Location Dependant Across BC in Summer 2021?
-To answer this question, this tutorial will explain how to perform three different statistical tests; nearest neighbour analysis, quadrat analysis and k-function. These will determine if the wildfire size data are showing random, dispersed or clustered spatial patterns. To summarize point pattern analysis we will also perform a kernel density estimation based on the statistical test results. 
+To answer this question, this tutorial will explain how to perform three different statistical tests; nearest neighbour analysis, quadrat analysis, and k-function. These will determine if the wildfire size data shows random, dispersed or clustered spatial patterns. To summarize point pattern analysis we will also perform a kernel density estimation based on the statistical test results. 
 
 #### Nearest Neighbour Analysis
 Nearest Neighbour Analysis is a method used to assess whether points in a spatial distribution exhibit a random, dispersed, or clustered pattern (Le Corvec et al., 2013). This technique works by calculating and comparing the average distance between each point and its nearest neighbor (Le Corvec et al., 2013). In this tutorial, this distance is utilized to evaluate the similarity or dissimilarity between data points. To determine whether our fire pattern is clustered or dispersed, we compared the observed distances to the average nearest neighbour distance expected from a random pattern with the same spatial density.
@@ -514,7 +514,7 @@ dev.off()
 #### Quadrat Analysis
 Quadrat analysis can be defined as a mathematical and statistical technique to measure properties of point patterns (Thomas, 1977). This method divides our BC study area into quadrats and analyzes the density of wildfire points in each quadrat (Thomas, 1977). It does this to test if our spatial patterns are significantly different from random.
 
-For the quadrat analysis performed in this study we are using a study area of approximately 947848424073 square meters divided into 144 quadrats (12x12). By using 144 quadrats each quadrat has an area of approximately 1 square kilometere. The following code converts the fire points to a planar point pattern object, main class for point pattern analysis in spatstat. It then divides the study area into a grid of quadrats and counts the number of fire points in each quadrat. The density of points are stored in a data frame (qcount.df).
+For the quadrat analysis performed in this study, we are using a study area of approximately 947848424073 square meters divided into 144 quadrats (12x12). By using 144 quadrats each quadrat has an area of approximately 1 square kilometere. The following code converts the fire points to a planar point pattern object, a main class for point pattern analysis in spatstat. It then divides the study area into a grid of quadrats and counts the number of fire points in each quadrat. The density of points is stored in a data frame (qcount.df).
 ```{r Quadrat Analysis, echo=TRUE, eval=TRUE, warning=FALSE}
 # Convert fire_point to an sf object using LATITUDE and LONGITUDE
 fire_point_sf <- st_as_sf(fire_point, coords = c("LONGITUDE", "LATITUDE"), crs = 3005)
@@ -593,7 +593,7 @@ To calculate complete spatial randomness the following equation is used:
 
 $$K_{CSR}(d) = \pi d^2$$
 
-Code used to obtain the K-function for wildfire points is below. 
+The code used to obtain the K-function for wildfire points is below. 
 ```{r K Function, echo=TRUE, eval=TRUE, warning=FALSE}
 #Create a basic k-function
 k.fun <- Kest(fire.ppp, correction = "Ripley")
@@ -609,7 +609,7 @@ The kernel density estimation (KDE) is used to estimate the probability density 
 
 $$\hat\lambda_p = \frac{no. [S \in C(\boldsymbol{p, r})]}{\pi r^2}$$
 
-Each location (p) has a circle (C) with radius (r) drawn around it. Next the number (no.) of points (S) within in the circle are divided by the area of the circle. The radius of the circle is known as sigma. A smaller sigma (and smaller bandwidth) shows much more detail and allows for easier identification of hotspots than a larger sigma. While larger sigma values make hotspots less obvious, they produce a smoother image. This option may come in handy if working with noisy data or a small sample size. The outcome of this estimate is a grid of cells containing values that estimate the number of points that fall within the circle around it. 
+Each location (p) has a circle (C) with a radius (r) drawn around it. Next the number (no.) of points (S) within the circle are divided by the area of the circle. The radius of the circle is known as sigma. A smaller sigma (and smaller bandwidth) shows much more detail and allows for easier identification of hotspots than a larger sigma. While larger sigma values make hotspots less obvious, they produce a smoother image. This option may come in handy if working with noisy data or a small sample size. The outcome of this estimate is a grid of cells containing values that estimate the number of points that fall within the circle around it. 
 
 The code to obtain the kernel density estimation is below.
 ```{r Kernel Density, echo=TRUE, eval=TRUE, warning=FALSE}
@@ -628,7 +628,7 @@ The following formula is used to calculate IDW:
 $$Z_i = \frac{\sum_{j=1}^{n}\frac{z_j}{d_{ij}^p}}{\sum_{j=1}^{n}\frac{1}{d_{ij}^p}}$$
 
 In R, we can create an IDW temperature surface and clip that to the boundary of BC. This allows us to create a map of BC that displays our interpolated IDW temperature surface. 
-To begin, make sure the climate data shapefile is read in. For this interpolation I am using a CRS of 3005.
+To begin, make sure the climate data shapefile is read in. For this interpolation, I am using a CRS of 3005.
 ```{r IDW, echo=TRUE, eval=TRUE, warning=FALSE}
 # Read the shapefile
 climate_data <- st_read("ClimateData.shp")
@@ -652,7 +652,7 @@ idw_result <- gstat::idw(TEMP ~ 1,
 # Convert idw_result to an sf object
 idw_sf <- st_as_sf(idw_result)
 ```
-Now we will clip the interpolated data to the BC boundary. Load in the BC boundary like we did above in this tutorial and transform the CRS of the IDW results to match the CRS of the boundary. This ensures compatibility for clipping.
+Now we will clip the interpolated data to the BC boundary. Load in the BC boundary as we did above in this tutorial and transform the CRS of the IDW results to match the CRS of the boundary. This ensures compatibility for clipping.
 ```{r IDW, echo=TRUE, eval=TRUE, warning=FALSE}
 # Load the polygon shapefile for clipping
 bc_boundary <- st_read("BC_bound.shp")
@@ -692,7 +692,7 @@ ggsave("Clipped_IDW_Interpolation_Map.png", width = 10, height = 8, dpi = 300)
 ```
 
 #### Ordinary Kriging
-Ordinary kriging is an interpolation method in which the predictor is an optimal linear predictor, and the result is a exact interpolation (Dumas et al., 2013). This simply means that each point being predicted using kriging will be the best linear unbiased estimate and that predictions at sampled points are the same as observed values with minimal variance (Dumas et al., 2013). Kriging involves the use of a semivariogram to assign weights to known data points to make predictions at unsampled locations (O’sullivan & Unwin, 2010). The main assumption of kriging is a constant mean across the domain (O’sullivan & Unwin, 2010). In this tutorial it means that the average temperature is constant across the entire domain of BC. 
+Ordinary kriging is an interpolation method in which the predictor is an optimal linear predictor, and the result is an exact interpolation (Dumas et al., 2013). This simply means that each point being predicted using kriging will be the best linear unbiased estimate and that predictions at sampled points are the same as observed values with minimal variance (Dumas et al., 2013). Kriging involves the use of a semivariogram to assign weights to known data points to make predictions at unsampled locations (O’sullivan & Unwin, 2010). The main assumption of kriging is a constant mean across the domain (O’sullivan & Unwin, 2010). In this tutorial, it means that the average temperature is constant across the entire domain of BC. 
 
 The purpose of performing kriging in this tutorial is to interpolate an accurate spatial representation of temperature across BC and account for areas where there are no temperature measurements. To perform kriging we will be working with our climate shapefile that was created earlier in this tutorial. Load in this file and use the function f.0 to define a formula for the kriging model with temperature as our variable of interest. 
 ```{r Kriging, echo=TRUE, eval=TRUE, warning=FALSE}
@@ -791,7 +791,7 @@ tmap_save(
 ### Combining Temperature and Wildfire Surfaces
 Before we can perform further statistics to analyze the correlation between temperature and wildfire location in British Columbia during the summer of 2021, we must combine the temperature and fire data by adding the density values from the fire dataset to the polygons in the interpolated temperature surface.
 
-To aquire these results we must first align the CRS of the IDW clipped and density results.
+To acquire these results we must first align the CRS of the IDW clipped and density results.
 ```{r Combining data, echo=TRUE, eval=TRUE, warning=FALSE}
 # If they are different, transform one to match the other
 if (st_crs(idw_clipped) != st_crs(density_sf)) {
@@ -850,10 +850,10 @@ ggsave("Temperature_Combo_Map.png", plot = temp_map, width = 10, height = 8, dpi
 ```
 
 ### Determining if Temperature Explains Wildfire Spatial Variability
-In this part of the tutorials method section Ordinary Least Squares (OLS), Global Moran's I (using result from OLS) and Global Weighted Regression models will be conducted. These statistical tests will determine if, at a global scale across BC, the temperature variable is able to explain the variability in the density of fires during the 2021 summer months.
+In this part of the tutorial method section Ordinary Least Squares (OLS), Global Moran's I (using results from OLS,) and Global Weighted Regression models will be conducted. These statistical tests will determine if, at a global scale across BC, the temperature variable is able to explain the variability in the density of fires during the 2021 summer months.
 
 #### Ordinary Least Squares
-Ordinary Least Squares (OLS) regression determines whether temperature explains wildfire spatial variability by modeling the relationship between the independent variable (temperature) and the dependent variable (fire) across BC. It does so by minimizing the squared differences between observed fire occurrence and the values predicted based on temperature, fitting a linear model to the data (Majka, 2024). The model evaluates how much of the variation in wildfire occurrence is explained by temperature using the proportion of variance accounted for by the independent variable. The higher the R squared value the more influence temperature has on fire spatial variability (Majka, 2024). The slope of the model determines if there is a positive, negative or negligible relationship between the variables. If the slope is positive it means that  temperature strongly influences the spatial distribution of wildfires (Majka, 2024). A negative slope indicates an inverse relationship, where an increase in temperature would result in less fire occurrence (Majka, 2024). A slope of approximately zero suggests no relationship between the variables (Majka, 2024).
+Ordinary Least Squares (OLS) regression determines whether temperature explains wildfire spatial variability by modeling the relationship between the independent variable (temperature) and the dependent variable (fire) across BC. It does so by minimizing the squared differences between observed fire occurrence and the values predicted based on temperature, fitting a linear model to the data (Majka, 2024). The model evaluates how much of the variation in wildfire occurrence is explained by temperature using the proportion of variance accounted for by the independent variable. The higher the R squared value the more influence temperature has on fire spatial variability (Majka, 2024). The slope of the model determines if there is a positive, negative, or negligible relationship between the variables. If the slope is positive it means that  temperature strongly influences the spatial distribution of wildfires (Majka, 2024). A negative slope indicates an inverse relationship, where an increase in temperature would result in less fire occurrence (Majka, 2024). A slope of approximately zero suggests no relationship between the variables (Majka, 2024).
 
 This tutorial will now demonstrate how to calculate the residuals using OLS regression and then plot them on a map for visualization.
 
@@ -886,7 +886,7 @@ ggsave("residuals_map.png", width = 10, height = 8, dpi = 300)
 ```
 
 #### Global Moran's I
-The next step in this tutorial is to calculate the Global Moran’s I statistic using the residuals obtained from OLS. This is a measure of overall spatial autocorrelation across a given area (Getis and Ord, 1992). It assesses the degree of similarity between neighbouring spatial units based on a given variable (Getis and Ord, 1992). In this tutorial the Global Moran’s I will be determining if the residuals (differences between the observed and predicted values of fires) from the OLS regression across BC are spatially autocorrelated. It is a global scale measurement because we are considering the entirety of BC in assessing spatial autocorrelation. To determine Moran's I, we must first choose a spatial weighting matrix. In this tutorial we will be using Queen's weight. A positive Moran’s I value tells us that there is positive spatial autocorrelation which translates into a clustered distribution (Getis and Ord,1992). A negative Moran’s I value indicates negative spatial autocorrelation and a dispersed distribution, and a Moran’s I value of exactly 0 means the data is randomly distributed (Getis and Ord, 1992).
+The next step in this tutorial is to calculate the Global Moran’s I statistic using the residuals obtained from OLS. This is a measure of overall spatial autocorrelation across a given area (Getis and Ord, 1992). It assesses the degree of similarity between neighbouring spatial units based on a given variable (Getis and Ord, 1992). In this tutorial the Global Moran’s I will be determining if the residuals (differences between the observed and predicted values of fires) from the OLS regression across BC are spatially autocorrelated. It is a global scale measurement because we are considering the entirety of BC in assessing spatial autocorrelation. To determine Moran's I, we must first choose a spatial weighting matrix. In this tutorial, we will be using Queen's weight. A positive Moran’s I value tells us that there is positive spatial autocorrelation which translates into a clustered distribution (Getis and Ord,1992). A negative Moran’s I value indicates negative spatial autocorrelation and a dispersed distribution, and a Moran’s I value of exactly 0 means the data is randomly distributed (Getis and Ord, 1992).
  
 We can mathematically calculate the Global Moran’s I statistic using the following equation:
 
@@ -932,7 +932,7 @@ Now create a queen's weight matrix using the nb2listw command which converts the
 # Create residual weights matrix
 residual.lw <- nb2listw(residual.nb, zero.policy = TRUE, style = "W")
 ```
-We are now ready to calculate the Global Moran's I and extract the moran's I results.
+We are now ready to calculate the Global Moran's I and extract the Moran's I result.
 ```{r Moran's I, echo=TRUE, eval=TRUE, warning=FALSE}
 # Calculating Global Morans I
 residual_mi <- moran.test(residual_noNA$`residuals`, residual.lw, zero.policy = TRUE)
@@ -983,7 +983,7 @@ dev.off()
 #### Geographically Weighted Regression
 Since the Global Moran's I indicated positive spatial autocorrelation, the main OLS assumption stating that residuals are independent is violated and a geographically weighted regression (GWR) must be conducted. This analysis is more complex than the OLS regression as it allows for the regression coefficients to vary spatially, meaning the relationship between variables can change depending on the location (Páez & Wheeler, 2009). It does this by fitting regression models at each location instead of using a single global regression model and therefore is not as influenced by spatial autocorrelation (Páez & Wheeler, 2009). 
 
-Using GWR we will be able to identify where across BC temperature has significant influence on fire occurrence  compared to where it has negligible effects.
+Using GWR we will be able to identify where across BC temperature has a significant influence on fire occurrence  compared to where it has negligible effects.
 
 The following steps are done to prepare the data for GWR.
 ```{r GWR, echo=TRUE, eval=TRUE, warning=FALSE}
@@ -1081,7 +1081,7 @@ ggsave("gwr_coefficients_fixed_bandwidth.png", width = 10, height = 8, dpi = 300
 
 ![density_of_fires_map](https://github.com/user-attachments/assets/823c254b-e497-4fc8-a871-3b12eb25c91d)
 
-Based on the density map we can see that the location  of fires during summer 2021 were most compact in south-central BC, indicated by the yellow point on the map. This is followed by the orange points, which plot in a similar region.
+Based on the density map we can see that the location of fires during the summer of 2021 were most compact in south-central BC, as indicated by the yellow point on the map. This is followed by the orange points, which plot in a similar region.
 
 #### Is the Relative Size and Frequency of Wildfires Location Dependant Across BC in Summer 2021?
 
@@ -1089,24 +1089,24 @@ This section of the report will outline the results of the three statistical tes
 
 ![Output_Table3](https://github.com/user-attachments/assets/f4d82e8c-59f1-436a-a6d8-c1e3f77259f9)
 
-Beginning with the nearest neighbour analysis, we can see in table 3 that on average fires are approximately 27.3 km apart, however if they were to be randomly distributed, we would expect them to be 12.7 km apart. The outputted NND test value shows a clustered pattern when compared to the values for NNDd and NNDr. This is because the NND value of 57.2 is smaller than that for NNDr. According to the nearest neighbour method, the z-value of -73.07 confirms that there is strong evidence for fires of similar size (ha) in BC during the summer of 2021 being extremely clustered.
+Beginning with the nearest neighbour analysis, we can see in Table 3 that on average fires are approximately 27.3 km apart, however, if they were to be randomly distributed, we would expect them to be 12.7 km apart. The outputted NND test value shows a clustered pattern when compared to the values for NNDd and NNDr. This is because the NND value of 57.2 is smaller than that for NNDr. According to the nearest neighbour method, the z-value of -73.07 confirms that there is strong evidence for fires of similar size (ha) in BC during the summer of 2021 being extremely clustered.
 
 ![Output_Table4](https://github.com/user-attachments/assets/de68401a-3a92-4492-aaee-57ac481ad108)
 
-When the study area (BC) was divided into 144 quadrates, the results obtained from quadrat analysis in table 4 indicate that there was a high variance of fires across the quadrats. The VMR being greater than 1 (38.33) suggests strong clustering and the chi-square value of 5481.28 confirms that this clustering is statistically significant.
+When the study area (BC) was divided into 144 quadrats, the results obtained from quadrat analysis in Table 4 indicate that there was a high variance of fires across the quadrats. The VMR being greater than 1 (38.33) suggests strong clustering and the chi-square value of 5481.28 confirms that this clustering is statistically significant.
 
 ![Basic K-function](https://github.com/user-attachments/assets/bb82b9c6-958d-4a8f-8067-4cf8e802b151)
 
-The K-function further suggests spatial clustering of fires in the summer of 2021 across BC. In figure 6 we can see that the observed K-function ($$K(d)$$) represented by the black line plots above the theoretical K-function ($$K_{CSR}(d)$$) represented by the red dotted line. This indicates that fire locations are more clustered than would be expected under random distribution.
+The K-function further suggests spatial clustering of fires in the summer of 2021 across BC. In Figure 6 we can see that the observed K-function ($$K(d)$$) is represented by the black line plots above the theoretical K-function ($$K_{CSR}(d)$$) represented by the red dotted line. This indicates that fire locations are more clustered than would be expected under random distribution.
 
 #### Where are the Fire Hotspots Located?
 ![Kernal Density](https://github.com/user-attachments/assets/db3954a7-88c1-4a2c-9f7b-693e9f70a9a5)
 
-This kernel density estimation in figure 7 confirms the clustering patterns indicated by the K-function. The yellow/red areas display the hotspots in BC where fires were concentrated/clustered. These results align well with the density map.
+This kernel density estimation in Figure 7 confirms the clustering patterns indicated by the K-function. The yellow/red areas display the hotspots in BC where fires were concentrated/clustered. These results align well with the density map.
 
 ![Clipped_IDW_Interpolation_Map](https://github.com/user-attachments/assets/01a078fc-cd47-47a8-9479-8294bf175eed)
 
-The clipped IDW results displayed by figure 8 show that the highest temperatures (temperatures above 16°C) occur around the south-central region of BC. 
+The clipped IDW results displayed in Figure 8 show that the highest temperatures (temperatures above 16°C) occur around the south-central region of BC. 
 
 ![Raster](https://github.com/user-attachments/assets/5ad3a820-21d7-47ab-afec-ae6e156c5c94)
 
@@ -1118,11 +1118,11 @@ Figure 11 overlays the interpolated temperature surface (acquired using clipped 
 
 ![residuals_map](https://github.com/user-attachments/assets/7458aaf2-bea9-43f3-be6d-d1584e1caef0)
 
-The mapped result of this tutorials OLS regression can be seen in figure 12. This map displays the difference between observed fire density and predicted values based on temperature as 'residuals'. The purple/blue regions are where the model overpredicted fire density and the yellow/orange regions are where the model underpredicted fire density and indicate where the interpolated temperature surface did not accurately predict fire density. Areas with low residuals represent regions in BC that temperature is a good predictor of fire density and areas with high residuals indicate where temperature is not as accurate in predicting fire density.
+The mapped result of this tutorials OLS regression can be seen in Figure 12. This map displays the difference between observed fire density and predicted values based on temperature as 'residuals'. The purple/blue regions are where the model overpredicted fire density and the yellow/orange regions are where the model underpredicted fire density and indicate where the interpolated temperature surface did not accurately predict fire density. Areas with low residuals represent regions in BC where temperature is a good predictor of fire density and areas with high residuals indicate where temperature is not as accurate in predicting fire density.
 
 ![moran_scatter_plot_fixed](https://github.com/user-attachments/assets/41b2d9e9-43e6-4027-9d9f-e71d2f9daa53)
 
-A moans scatter plot (figure 14) was created to determine if there was any spatial autocorrelation in the residuals. The upward slope of the trendline in this scatter plot indicates positive spatial autocorrelation, meaning that the yellow/orange areas in figure 12 where there are high residuals are surrounded by neighbours that also have high residuals. The same explanation applies to blue/purple areas with low residuals as they will be surrounded with neighbours that also contain low residuals. This result contradicts the main assumption of the OLS regression model and suggests the residuals are not independent. For this reason, to better address spatial dependence a geographically weighted regression was run.
+A moans scatter plot (figure 14) was created to determine if there was any spatial autocorrelation in the residuals. The upward slope of the trendline in this scatter plot indicates positive spatial autocorrelation, meaning that the yellow/orange areas in Figure 12 where there are high residuals are surrounded by neighbours that also have high residuals. The same explanation applies to blue/purple areas with low residuals as they will be surrounded by neighbours that also contain low residuals. This result contradicts the main assumption of the OLS regression model and suggests the residuals are not independent. For this reason, to better address spatial dependence a geographically weighted regression was run.
 
 ![gwr_coefficients_fixed_bandwidth](https://github.com/user-attachments/assets/95c89cc8-c33a-4a07-84e7-4165076bd253)
 
@@ -1135,7 +1135,7 @@ The main message stemming from the results of this tutorial is that temperature 
 
 Dumas, A., Echard, B., Gayton, N., Rochat, O., Dantan, J.-Y., & Van Der Veen, S. (2013). AK-ILS: An Active learning method based on Kriging for the Inspection of Large Surfaces. Precision Engineering, 37(1), 1–9. https://doi.org/10.1016/j.precisioneng.2012.07.007
 
-Getis, A., & Ord, J. K. (1992). The Analysis of Spatial Association by Use of Distance Statistics. Geo- graphical Analysis, 24(3), 189–206. https://doi.org/10.1111/j.1538-4632.1992.tb00261.x
+Getis, A., & Ord, J. K. (1992). The Analysis of Spatial Association by Use of Distance Statistics. Geo-graphical Analysis, 24(3), 189–206. https://doi.org/10.1111/j.1538-4632.1992.tb00261.x
 
 Le Corvec, N., Spörli, K. B., Rowland, J., & Lindsay, J. (2013). Spatial distribution and alignments of volcanic centers: Clues to the formation of monogenetic volcanic fields. Earth-Science Reviews, 124, 96–114. https://doi.org/10.1016/j.earscirev.2013.05.005
 
