@@ -1065,21 +1065,21 @@ gwr_results_fixed <- cbind(gwr_results_fixed, coordinates_fixed)
 # Convert to an sf object for visualization
 gwr_output_sf_fixed <- st_as_sf(gwr_results_fixed, coords = c("X", "Y"), crs = st_crs(final_data_sf))
 ```
-For visualization of the GWR coefficients create a plot. 
+For visualization of the GWR results create a plot displaying the R-squares values across BC. In the code below note that 'localR2' is specifically selected for. 
 ```{r GWR, echo=TRUE, eval=TRUE, warning=FALSE}
 # Plotting GWR coefficients with the fixed bandwidth
 ggplot(data = gwr_output_sf_fixed) +
-  geom_sf(aes(color = gwr.e)) +
+  geom_sf(aes(color = localR2)) +
   scale_color_viridis_c(option = "C") +
   labs(
-    title = "GWR Coefficients with Fixed Bandwidth of 200 km",
-    fill = "GWR Estimate",
-    caption = "Figure 15: Visualizing local regression coefficients from GWR analysis."
+    title = "GWR R2 Coefficients",
+    fill = "GWR R2",
+      caption = "Figure 15: Visualizing local regression coefficients (R squared) from GWR analysis."
   ) +
   theme_minimal()
 
 # Optional: Save the plot
-ggsave("gwr_coefficients_fixed_bandwidth.png", width = 10, height = 8, dpi = 300)
+ggsave("gwr_coefficients_fixed_bandwidth.png", width = 15, height = 8, dpi = 300)
 ```
 
 ## Results
