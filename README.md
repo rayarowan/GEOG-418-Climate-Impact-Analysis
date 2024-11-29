@@ -419,7 +419,7 @@ Calculate the density of fire points using kernel density estimation, fill missi
 density_raster <- raster::rasterize(st_as_sf(fire_point), raster_template, fun = "count", field = 1)
 density_raster[is.na(density_raster)] <- 0
 ```
-Now convert the raster (density_raster) into a data frame (density_df) and again replace NA values in the data frame with zeros. The raster's column for fire values is renamed from layer to fires. After this, spatial analysis requires us to convert the density data frame back to an sf object.
+Now convert the raster (density_raster) into a data frame (density_df) and replace NA values in the data frame with zeros. The raster's column for fire values is renamed from layer to fires. After this, future spatial analysis requires us to convert the density data frame back to an sf object.
 ```{r Density Map, echo=TRUE, eval=TRUE, warning=FALSE}
 # Convert the raster to a data frame and replace any potential NAs with zeros
 density_df <- as.data.frame(density_raster, xy = TRUE)
@@ -435,20 +435,25 @@ Export the density points as a shapefile.
 ```{r Density Map, echo=TRUE, eval=TRUE, warning=FALSE}
 st_write(density_sf, "density_points.shp", delete_dsn = TRUE)
 ```
-We are now ready to plot our density points on a simple map using the following code. Again, the map will save to your working directory as a png file.
+We are now ready to plot our rasterized density points on a simple map using the following code. Again, the map will save to your working directory as a png file.
 ```{r Density Map, echo=TRUE, eval=TRUE, warning=FALSE}
 # Create a simple map
-ggplot() +
-  geom_sf(data = bc_bound, fill = NA, color = "black") +  # Plot the boundary polygon
-  geom_sf(data = density_sf, aes(color = fires), size = 1) +  # Plot the density points with color mapping
-  scale_color_viridis_c(option = "plasma", name = "Density of Fires") +  # Color scale for density values
+# Plotting the density map with the polygon boundary
+fire_density_map <- ggplot() +
+  geom_raster(data = density_df, aes(x = x, y = y, fill = fires)) +  # Use 'fires' from the data frame
+  geom_sf(data = bc_bound, fill = NA, color = "white") + # Boundary polygon
+  scale_fill_viridis_c(option = "plasma") +  # Using a color scale
   theme_minimal() +
-  labs(title = "Density of Fires within Boundary",
-       x = "Longitude",
-       y = "Latitude",
-       caption = "Figure 5: A simple map displaying the density of fires across British Columbia. The colour scale reflects the relative density of fires within each mapped grid cell.")
-       +
-         ggsave("density_of_fires_map.png", width = 10, height = 7, dpi = 300))
+  labs(
+    title = "Density Map of Fire Points",
+    x = "Longitude",
+    y = "Latitude",
+    fill = "Density",
+    caption = "Figure 5: The spatial distribution of fire density across BC during the summer of 2021."
+  )
+
+# Save the plot as a PNG file
+ggsave("density_of_fires_map.png", plot = fire_density_map, width = 10, height = 7, dpi = 300)
 ```
 
 #### Point Pattern Analysis
@@ -1079,7 +1084,7 @@ ggsave("gwr_coefficients_fixed_bandwidth.png", width = 10, height = 8, dpi = 300
 
 ## Results
 
-![density_of_fires_map](https://github.com/user-attachments/assets/823c254b-e497-4fc8-a871-3b12eb25c91d)
+![density_of_fires_map](https://github.com/user-attachments/assets/f63b2d04-0c38-41fa-ad75-a33cd682c248)
 
 Based on the density map we can see that the location of fires during the summer of 2021 were most compact in south-central BC, as indicated by the yellow point on the map. This is followed by the orange points, which plot in a similar region.
 
@@ -1124,9 +1129,9 @@ The mapped result of this tutorials OLS regression can be seen in Figure 12. Thi
 
 A moans scatter plot (Figure 14) was created to determine if there was any spatial autocorrelation in the residuals. The upward slope of the trendline in this scatter plot indicates positive spatial autocorrelation, meaning that the yellow/orange areas in Figure 12 where there are high residuals are surrounded by neighbours that also have high residuals. The same explanation applies to blue/purple areas with low residuals as they will be surrounded by neighbours that also contain low residuals. This result contradicts the main assumption of the OLS regression model and suggests the residuals are not independent. For this reason, to better address spatial dependence a geographically weighted regression was run.
 
-![gwr_coefficients_fixed_bandwidth](https://github.com/user-attachments/assets/95c89cc8-c33a-4a07-84e7-4165076bd253)
+<img width="539" alt="GWR_R2" src="https://github.com/user-attachments/assets/1e864864-e8bc-4e69-9570-4788c79d1b2d">
 
-Figure 15 displays the GWR results. As displayed in the code, this model used a fixed bandwidth of 200km. This means that in each local regression data from a 200km radius around a centroid data point was incorporated. The yellow/orange points are areas with positive coefficients and where we would expect high temperatures to be associated with high fire densities as temperature at these locations strongly influences the wildfire activity. The blue/purple points are areas with negative coefficients. At these locations higher temperatures are associated with lower fire densities, suggesting other factors may be at play to offset the impact temperature has on wildfire activity. 
+Figure 15 displays the GWR results. As displayed in the code, this model used a fixed bandwidth of 200km. This means that in each local regression data from a 200km radius around a centroid data point was incorporated. The yellow/orange points are areas with high R-squared values indicating that the residuals plotted farther from the linear regression line. This means that the model was not a good predictor at these locations. The blue/purple points are areas with lower R-squared values. The closer to zero these values are the better the residuals plot along the linear regression line at these localized areas meaning the temperature was a good predictor of fire occurrence. 
 
 ## Discussion
 The main message stemming from the results of this tutorial is that in the southern central regions of British Columbia, from May to September 2021, high temperatures were a primary cause of wildfire occurrence. Higher temperatures here resulted in regions with more fires. Elsewhere in BC, particularly in the northern regions, temperature is not seen to influence wildfire occurrence as strongly. 
