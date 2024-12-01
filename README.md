@@ -458,7 +458,7 @@ ggsave("density_of_fires_map.png", plot = fire_density_map, width = 10, height =
 
 #### Point Pattern Analysis
 ##### Is the Relative Size and Frequency of Wildfires Location Dependant Across BC in Summer 2021?
-To answer this question, this tutorial will explain how to perform three different statistical tests; nearest neighbour analysis, quadrat analysis, and k-function. These will determine if the wildfire size data shows random, dispersed or clustered spatial patterns. To summarize point pattern analysis we will also perform a kernel density estimation based on the statistical test results. 
+To answer this question, this tutorial will guide you through three statistical tests—nearest neighbor analysis, quadrat analysis, and K-function—to evaluate whether the wildfire size data exhibits random, dispersed, or clustered spatial patterns. Additionally, to provide a comprehensive summary of point pattern analysis, we will perform a kernel density estimation based on the results of these statistical tests.
 
 #### Nearest Neighbour Analysis
 Nearest Neighbour Analysis is a method used to assess whether points in a spatial distribution exhibit a random, dispersed, or clustered pattern (Le Corvec et al., 2013). This technique works by calculating and comparing the average distance between each point and its nearest neighbor (Le Corvec et al., 2013). In this tutorial, this distance is utilized to evaluate the similarity or dissimilarity between data points. To determine whether our fire pattern is clustered or dispersed, we compared the observed distances to the average nearest neighbour distance expected from a random pattern with the same spatial density.
@@ -624,7 +624,7 @@ plot(kde.fire, main = "Kernel Density Estimation of Fires")
 ```
 
 ### Creating Temperature Surface
-To create the temperature surface across BC using data from May 1st to September 1st, 2021, inverse distance weighting (IDW) and kriging will be used to create an interpolated surface of the temperature variable.
+To generate a temperature surface across British Columbia for the period from May 1 to September 1, 2021, two interpolation methods, Inverse Distance Weighting (IDW) and kriging, will be employed to create a continuous representation of the temperature variable.
 #### Inverse Distance Weighting
 IDW is a surface interpolation technique in which the value at an unsampled location is estimated as a weighted average of values from nearby sampled points (Lu & Wong, 2008). The relationship is inverse as with more distance between the unknown and known point, the less influence the known point has when estimating the unknown value (Lu & Wong, 2008). A power or distance-decay parameter is typically applied, adjusting how rapidly the influence diminishes with distance (Lu & Wong, 2008). 
 
@@ -855,12 +855,12 @@ ggsave("Temperature_Combo_Map.png", plot = temp_map, width = 10, height = 8, dpi
 ```
 
 ### Determining if Temperature Explains Wildfire Spatial Variability
-In this part of the tutorial method section Ordinary Least Squares (OLS), Global Moran's I (using results from OLS,) and Global Weighted Regression models will be conducted. These statistical tests will determine if, at a global scale across BC, the temperature variable is able to explain the variability in the density of fires during the 2021 summer months.
+This section of the tutorial's methodology will employ Ordinary Least Squares (OLS), Global Moran's I (based on OLS results), and Geographically Weighted Regression (GWR) models. These statistical analyses will assess, on a global scale across British Columbia, the extent to which the temperature variable explains the variability in fire density during the summer months of 2021.
 
 #### Ordinary Least Squares
 Ordinary Least Squares (OLS) regression determines whether temperature explains wildfire spatial variability by modeling the relationship between the independent variable (temperature) and the dependent variable (fire) across BC. It does so by minimizing the squared differences between observed fire occurrence and the values predicted based on temperature, fitting a linear model to the data (Majka, 2024). The model evaluates how much of the variation in wildfire occurrence is explained by temperature using the proportion of variance accounted for by the independent variable. The higher the R squared value the more influence temperature has on fire spatial variability (Majka, 2024). The slope of the model determines if there is a positive, negative, or negligible relationship between the variables. If the slope is positive it means that  temperature strongly influences the spatial distribution of wildfires (Majka, 2024). A negative slope indicates an inverse relationship, where an increase in temperature would result in less fire occurrence (Majka, 2024). A slope of approximately zero suggests no relationship between the variables (Majka, 2024).
 
-This tutorial will now demonstrate how to calculate the residuals using OLS regression and then plot them on a map for visualization.
+This tutorial will now demonstrate how to calculate the residuals using OLS regression. After which the residuals will be mapped for visualization.
 
 First, we will read in the final data shapefile created during the combination of temperature and fire data.
 ```{r OLS, echo=TRUE, eval=TRUE, warning=FALSE}
@@ -1141,6 +1141,8 @@ A recent study by Dastour et al. (2024) concluded similar findings, demonstratin
 This study faced several significant limitations, particularly concerning data availability and quality, as well as the Geographically Weighted Regression (GWR) model's assumption of linear relationships. Both temperature and fire datasets included numerous areas with missing observations, creating gaps in the analyses that led to errors such as over or under-predictions in the interpolated surface models. Since these models were integral to the GWR analysis, the resulting outputs also contained inaccuracies. Additionally, the BC fire datasets typically exhibit bias, as larger, more destructive fires are often prioritized in reporting, leading to an underrepresentation of smaller incidents.
 The GWR model's assumption of a linear relationship further posed challenges, as it may oversimplify the complex interactions between temperature and fire variables, rendering it insufficient for robust modeling. To address this, incorporating additional climate variables such as wind, precipitation, or humidity could provide a more comprehensive understanding of fire patterns in northern BC. Moreover, the GWR results highlighted the tutorial's inefficiencies in accurately correlating temperature and fire in northern regions. Future analyses should leverage more complete and reliable data to better clarify the relationship between temperature and fire activity across BC's diverse landscapes. 
 
+## Conclusion
+In conclusion, while this study successfully highlighted the impact of rising temperatures on wildfire patterns in BC, it also emphasized the need for more robust models and higher-quality data to refine these insights. These findings contribute to a growing body of research that underscores the importance of addressing climate change to mitigate the increasing risks associated with wildfires globally.
 
 ## References
 
