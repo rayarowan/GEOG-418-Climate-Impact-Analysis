@@ -1142,7 +1142,7 @@ This study faced several significant limitations, particularly concerning data a
 The GWR model's assumption of a linear relationship further posed challenges, as it may oversimplify the complex interactions between temperature and fire variables, rendering it insufficient for robust modeling. To address this, incorporating additional climate variables such as wind, precipitation, or humidity could provide a more comprehensive understanding of fire patterns in northern BC. Moreover, the GWR results highlighted the tutorial's inefficiencies in accurately correlating temperature and fire in northern regions. Future analyses should leverage more complete and reliable data to better clarify the relationship between temperature and fire activity across BC's diverse landscapes. 
 
 ## Conclusion
-In conclusion, while this study successfully highlighted the impact of rising temperatures on wildfire patterns in BC, it also emphasized the need for more robust models and higher-quality data to refine these insights. These findings contribute to a growing body of research that underscores the importance of addressing climate change to mitigate the increasing risks associated with wildfires globally.
+In conclusion, while this study successfully highlighted the impact of rising temperatures on wildfire patterns in BC, it also emphasized the need for more robust models and higher quality data to refine these insights. These findings contribute to a growing body of research that highlights the importance of addressing climate change leading to increasing global temperatures to mitigate the risks associated with wildfires globally.
 
 ## References
 
